@@ -21,7 +21,7 @@ function Profile() {
         </div>
       </header>
 
-      <div className="max-w-[1000px] mx-auto px-margin-mobile md:px-margin-desktop py-lg space-y-lg flex flex-col md:flex-row gap-8">
+      <div className="max-w-[1100px] mx-auto px-margin-mobile md:px-margin-desktop py-lg space-y-lg flex flex-col md:flex-row gap-8">
         {/* Profile Sidebar Settings Nav */}
         <div className="w-full md:w-64 shrink-0 space-y-2">
           <button className="w-full text-left px-4 py-3 rounded-xl bg-primary-container text-on-primary-container font-label-md text-label-md font-bold flex items-center gap-3 transition-colors">
@@ -71,7 +71,7 @@ function Profile() {
           {/* Form Sections */}
           <div className="space-y-6">
             <h3 className="font-headline-sm text-headline-sm font-bold text-on-surface">Personal Information</h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="font-label-md text-label-md text-on-surface">First Name</label>
@@ -90,7 +90,7 @@ function Profile() {
 
             <div className="pt-6 border-t border-outline-variant/20">
               <h3 className="font-headline-sm text-headline-sm font-bold text-on-surface mb-6">Preferences</h3>
-              
+
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -121,7 +121,7 @@ function Profile() {
               <button className="px-6 py-2 bg-primary text-on-primary rounded-full font-label-md text-label-md font-bold shadow-md hover:bg-on-primary-fixed-variant transition-colors">Save Changes</button>
             </div>
           </div>
-          
+
           {/* Danger Zone */}
           <div className="mt-12 pt-8 border-t border-error/20">
             <h3 className="font-headline-sm text-headline-sm font-bold text-error mb-2">Danger Zone</h3>

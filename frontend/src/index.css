@@ -64,6 +64,12 @@
   --spacing-margin-mobile: 16px;
   --spacing-margin-desktop: 80px;
   --spacing-base: 8px;
+
+  --max-w-xs: 20rem;
+  --max-w-sm: 24rem;
+  --max-w-md: 28rem;
+  --max-w-lg: 32rem;
+  --max-w-xl: 36rem;
 }
 
 @utility font-headline-xl-mobile { font-family: 'Inter', sans-serif; }

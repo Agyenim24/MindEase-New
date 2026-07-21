@@ -8,11 +8,15 @@ import Programs from './pages/Programs';
 import Community from './pages/Community';
 import Resources from './pages/Resources';
 import Profile from './pages/Profile';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
 
 function App() {
   return (
     <Routes>
       <Route path="/" element={<LandingPage />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<Signup />} />
       <Route element={<Layout />}>
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/chat" element={<Chat />} />

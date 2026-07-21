@@ -16,8 +16,8 @@ function LandingPage() {
           </div>
         </div>
         <div className="flex items-center gap-4">
-          <Link to="/dashboard" className="hidden md:block text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md">Login</Link>
-          <Link to="/dashboard" className="bg-primary text-on-primary px-6 py-2.5 rounded-full font-label-md text-label-md hover:opacity-90 active:scale-95 transition-all">Get Started</Link>
+          <Link to="/login" className="hidden md:block text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md">Login</Link>
+          <Link to="/signup" className="bg-primary text-on-primary px-6 py-2.5 rounded-full font-label-md text-label-md hover:opacity-90 active:scale-95 transition-all">Get Started</Link>
         </div>
       </nav>
 
@@ -92,7 +92,7 @@ function LandingPage() {
           <div className="container mx-auto px-margin-mobile md:px-margin-desktop">
             <div className="text-center mb-16">
               <h2 className="font-headline-lg text-headline-lg text-on-surface mb-4">How MindEase Works</h2>
-              <p className="font-body-md text-body-md  max-w-xl mx-auto ">Three simple steps to start your journey toward a calmer mind.</p>
+              <p className="font-body-md text-body-md text-on-surface-variant w-full mx-auto ">Three simple steps to start your journey toward a calmer mind.</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
               <div className="relative flex flex-col items-center text-center">
@@ -242,7 +242,7 @@ function LandingPage() {
               <div className="relative z-10">
                 <h2 className="font-headline-xl-mobile md:font-headline-xl text-headline-xl-mobile md:text-headline-xl mb-6">Ready to find your peace?</h2>
                 <p className="font-body-lg text-body-lg mb-10 opacity-90 max-w-2xl mx-auto">Join thousands of others who are managing their stress and building emotional resilience with MindEase.</p>
-                <Link to="/dashboard" className="inline-block bg-surface text-primary px-10 py-5 rounded-full font-label-md text-label-md hover:opacity-95 active:scale-95 transition-all shadow-xl">
+                <Link to="/signup" className="inline-block bg-surface text-primary px-10 py-5 rounded-full font-label-md text-label-md hover:opacity-95 active:scale-95 transition-all shadow-xl">
                   Start Your Free Trial
                 </Link>
               </div>

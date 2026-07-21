@@ -25,7 +25,7 @@ function Chat() {
 
       {/* Chat Canvas — scrollable area */}
       <div className="flex-1 overflow-y-auto py-lg px-margin-mobile md:px-0 custom-scrollbar">
-        <div className="max-w-[720px] mx-auto space-y-md">
+        <div className="max-w-[1100px] mx-auto space-y-md p-5">
           {/* Mood Check-in Component */}
           <section className="glass-panel rounded-3xl p-md mb-lg shadow-sm">
             <p className="text-center font-label-md text-label-md text-on-surface-variant mb-4">How are you feeling right now?</p>
@@ -76,7 +76,7 @@ function Chat() {
             </div>
             <div className="max-w-[85%] bg-white border border-outline-variant/30 p-md rounded-[1.25rem] rounded-bl-[4px] shadow-[0_20px_40px_-15px_rgba(0,89,186,0.04)] space-y-md">
               <p className="text-on-surface leading-relaxed">That sounds challenging. Disconnecting is a skill that takes practice. I've found that creating a 'transition ritual' can help signal to your brain that work is over.</p>
-              
+
               {/* Mini Card Inside Chat */}
               <div className="bg-surface-container-low rounded-xl p-4 border-l-4 border-secondary">
                 <h4 className="font-bold text-on-surface text-label-md mb-1">Recommended Exercise</h4>
@@ -129,7 +129,7 @@ function Chat() {
             </div>
           </div>
           <p className="text-center text-[10px] text-outline mt-3 px-12">
-            MindEase AI provides emotional support but is not a replacement for clinical therapy. 
+            MindEase AI provides emotional support but is not a replacement for clinical therapy.
             In case of a crisis, please use the <span className="text-error font-bold">Emergency Support</span> button.
           </p>
         </div>

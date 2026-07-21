@@ -57,7 +57,7 @@ function Programs() {
                   <span className="text-on-surface-variant text-[12px] font-medium">• Day 4 of 7</span>
                 </div>
                 <h3 className="font-headline-md text-headline-md text-on-surface">7-Day Stress Relief Mastery</h3>
-                <p className="text-on-surface-variant max-w-xl">Techniques grounded in cognitive behavioral therapy to help you identify stressors and apply immediate grounding exercises.</p>
+                <p className="text-on-surface-variant w-full">Techniques grounded in cognitive behavioral therapy to help you identify stressors and apply immediate grounding exercises.</p>
                 <div className="space-y-2">
                   <div className="flex justify-between text-[13px] font-bold">
                     <span>Progress</span>
@@ -155,12 +155,20 @@ function Programs() {
           </section>
 
           {/* Recommendation Section */}
-          <section className="bg-surface-container py-12 px-8 rounded-[40px] flex flex-col md:flex-row justify-between items-center gap-8 mb-xl">
-            <div className="max-w-xl text-center md:text-left">
-              <h2 className="font-headline-lg text-headline-lg mb-2">Not sure where to start?</h2>
-              <p className="text-on-surface-variant text-body-lg font-body-lg">Take our 2-minute assessment to find the program that matches your current emotional needs and goals.</p>
+          <section className="bg-gray-200 p-8 rounded-xl flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex-1">
+              <h2 className="font-headline-md text-headline-md text-on-surfac">
+                Not sure where to start?
+              </h2>
+
+              <p className="text-sm mt-4">
+                Take our 2-minute assessment to find the program that matches your current emotional needs and goals.
+              </p>
             </div>
-            <button className="whitespace-nowrap px-10 py-4 bg-on-surface text-surface rounded-full font-bold hover:opacity-90 transition-all active:scale-95">Take Assessment</button>
+
+            <button className="px-8 py-3 bg-black text-white cursor-pointer rounded-full font-semibold whitespace-nowrap hover:bg-gray-700 transition">
+              Take Assessment
+            </button>
           </section>
         </div>
         <Footer />
