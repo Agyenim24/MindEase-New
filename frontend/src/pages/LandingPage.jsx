@@ -55,7 +55,7 @@ const LandingPage = () => {
 
           </div>
         </div>
-        <Footer/>
+        
       </section>
     </>
   );
