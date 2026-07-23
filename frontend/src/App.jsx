@@ -10,11 +10,16 @@ import Resources from './pages/Resources';
 import Profile from './pages/Profile';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import LearnMore from './pages/LearnMore';
+import EmergencySupport from './pages/EmergencySupport';
+import Settings from './pages/Settings';
+import Help from './pages/Help';
 
 function App() {
   return (
     <Routes>
       <Route path="/" element={<LandingPage />} />
+      <Route path="/learn-more" element={<LearnMore />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
       <Route element={<Layout />}>
@@ -24,6 +29,9 @@ function App() {
         <Route path="/community" element={<Community />} />
         <Route path="/resources" element={<Resources />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/emergency" element={<EmergencySupport />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="/help" element={<Help />} />
       </Route>
     </Routes>
   );

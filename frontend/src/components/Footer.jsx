@@ -6,7 +6,7 @@ const Footer = () => {
   return (
     <footer className="bg-[#EEF2FF] border-t border-gray-200 mt-20">
       {/* Top Section */}
-      <div className="max-w-7xl mx-auto px-8 py-16 grid grid-cols-1 md:grid-cols-3 gap-16">
+      <div className="max-w-7xl mx-auto px-8 py-10 grid grid-cols-1 md:grid-cols-3 gap-16">
         {/* Left */}
         <div>
           <h2 className="text-2xl font-bold text-gray-900 mb-6">

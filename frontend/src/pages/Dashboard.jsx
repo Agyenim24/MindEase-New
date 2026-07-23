@@ -1,13 +1,16 @@
 import React from 'react';
 import Footer from '../components/Footer';
+import { useLayout } from '../components/Layout';
 
 function Dashboard() {
+  const { toggleMobileMenu } = useLayout();
+
   return (
     <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
       {/* Header / Top Bar */}
       <header className="sticky top-0 z-40 bg-background/80 glass-nav h-20 flex items-center justify-between px-margin-mobile md:px-margin-desktop border-b border-outline-variant/10 shrink-0">
         <div className="flex items-center gap-4">
-          <button className="md:hidden text-primary p-2">
+          <button onClick={toggleMobileMenu} className="md:hidden text-primary p-2">
             <span className="material-symbols-outlined">menu</span>
           </button>
           <div>

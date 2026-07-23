@@ -40,9 +40,9 @@ function LandingPage() {
                 <span>Start Chatting</span>
                 <span className="material-symbols-outlined">chat_bubble</span>
               </Link>
-              <button className="border border-primary text-primary px-8 py-4 rounded-full font-label-md text-label-md hover:bg-primary-fixed transition-all active:scale-95">
+              <Link to="/learn-more" className="border border-primary text-primary px-8 py-4 rounded-full font-label-md text-label-md hover:bg-primary-fixed transition-all active:scale-95 flex items-center justify-center">
                 Learn More
-              </button>
+              </Link>
             </div>
             {/* Hero Artwork Placeholder */}
             <div className="relative w-full aspect-video md:aspect-[21/9] rounded-3xl overflow-hidden shadow-2xl border border-outline-variant/20">

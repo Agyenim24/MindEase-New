@@ -1,13 +1,19 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Footer from '../components/Footer';
+import { useLayout } from '../components/Layout';
 
 function Community() {
+  const { toggleMobileMenu } = useLayout();
+
   return (
     <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
       {/* Top App Bar */}
       <header className="sticky top-0 w-full z-40 bg-surface/80 backdrop-blur-xl border-b border-outline-variant/30 h-20 flex justify-between items-center px-margin-mobile md:px-margin-desktop shrink-0">
         <div className="flex items-center gap-4">
+          <button onClick={toggleMobileMenu} className="md:hidden text-primary p-2">
+            <span className="material-symbols-outlined">menu</span>
+          </button>
           <h1 className="font-headline-md text-headline-md font-bold text-primary">Community Support</h1>
         </div>
         <div className="flex items-center gap-4">
