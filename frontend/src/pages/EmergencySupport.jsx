@@ -248,7 +248,8 @@ function EmergencySupport() {
 
           {/* ── International Resources Directory ───────────────── */}
           <section className="max-w-[1200px] mx-auto mb-16">
-            <div className="col-span-12 p-10 rounded-[2rem] bg-white shadow-sm border border-outline-variant/20">
+            <div className="col-span-12 p-5 md:p-10 rounded-[2rem] bg-white shadow-sm border border-outline-variant/20">
+
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
                 <div>
                   <h2 className="font-headline-md text-headline-md text-on-surface">International Resources</h2>

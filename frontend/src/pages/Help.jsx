@@ -127,7 +127,7 @@ function Help() {
             {helpCategories.map((cat) => (
               <div
                 key={cat.title}
-                className="bg-white p-10 rounded-xl border border-outline-variant/30 hover:border-primary/40 transition-all group cursor-pointer shadow-sm"
+                className="bg-white p-6 sm:p-8 md:p-10 rounded-2xl border border-outline-variant/30 hover:border-primary/40 transition-all group cursor-pointer shadow-sm"
               >
                 <div className={`w-12 h-12 ${cat.bg} rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
                   <span className={`material-symbols-outlined ${cat.color}`} style={{ fontVariationSettings: "'FILL' 1" }}>{cat.icon}</span>
@@ -150,11 +150,11 @@ function Help() {
           <section className="mb-16">
             <div className="flex justify-between items-end mb-6">
               <div>
-                <h2 className="font-headline-lg text-[30px] leading-[38px] font-semibold text-on-surface">Getting Started</h2>
-                <p className="text-on-surface-variant">Master MindEase in under 5 minutes with our visual guides.</p>
+                <h2 className="font-headline-lg text-[24px] sm:text-[30px] leading-[32px] sm:leading-[38px] font-semibold text-on-surface">Getting Started</h2>
+                <p className="text-on-surface-variant text-sm sm:text-base">Master MindEase in under 5 minutes with our visual guides.</p>
               </div>
-              <button className="text-primary font-label-md flex items-center gap-1 hover:underline">
-                View All Videos
+              <button className="text-primary font-label-md text-xs sm:text-sm flex items-center gap-1 hover:underline shrink-0">
+                View All
                 <span className="material-symbols-outlined">chevron_right</span>
               </button>
             </div>
@@ -178,12 +178,12 @@ function Help() {
           </section>
 
           {/* ── Two Column: Contact Form + FAQ ──────────────────── */}
-          <section className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+          <section className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
             {/* Left: Support Request Form */}
             <div className="space-y-10">
-              <div className="bg-surface-container-low p-10 rounded-3xl">
+              <div className="bg-surface-container-low p-6 sm:p-8 md:p-10 rounded-3xl">
                 <h2 className="font-headline-md text-headline-md text-on-surface mb-2">Support Request</h2>
-                <p className="text-on-surface-variant mb-10">Need technical assistance or found a bug? Our clinical and tech teams are here to help.</p>
+                <p className="text-on-surface-variant mb-8 text-sm sm:text-base">Need technical assistance or found a bug? Our clinical and tech teams are here to help.</p>
 
                 {ticketSubmitted && (
                   <div className="p-4 rounded-2xl bg-secondary-container text-on-secondary-container text-sm font-semibold flex items-center gap-2 mb-6 animate-fade-in">
@@ -193,7 +193,8 @@ function Help() {
                 )}
 
                 <form onSubmit={handleSupportSubmit} className="space-y-6">
-                  <div className="grid grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+
                     <div className="space-y-1">
                       <label className="font-label-sm text-on-surface-variant ml-2">Request Type</label>
                       <select

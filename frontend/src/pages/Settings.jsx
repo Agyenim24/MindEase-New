@@ -1,16 +1,15 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLayout } from '../components/Layout';
+import { useTheme } from '../context/ThemeContext';
 
 function Settings() {
   const { toggleMobileMenu } = useLayout();
+  const { darkMode, setDarkMode } = useTheme();
 
   // Profile state
   const [fullName, setFullName] = useState('Elena Rodriguez');
   const [email, setEmail] = useState('elena.rod@mindease.care');
-
-  // Appearance state
-  const [darkMode, setDarkMode] = useState(false);
 
   // Notification state
   const [dailyReminders, setDailyReminders] = useState(true);
@@ -31,11 +30,11 @@ function Settings() {
   const handleDiscard = () => {
     setFullName('Elena Rodriguez');
     setEmail('elena.rod@mindease.care');
-    setDarkMode(false);
     setDailyReminders(true);
     setClinicalUpdates(false);
     showToast('Changes discarded.');
   };
+
 
   return (
     <div className="flex-1 flex flex-col min-h-0 overflow-hidden bg-background">
@@ -61,11 +60,11 @@ function Settings() {
         <section className="p-margin-mobile md:p-margin-desktop max-w-[1000px] mx-auto w-full">
 
           {/* Page Header */}
-          <header className="mb-16">
-            <h1 className="font-headline-xl text-[32px] md:text-[40px] leading-[40px] md:leading-[48px] tracking-tight font-bold text-on-surface mb-2">
+          <header className="mb-6 md:mb-12">
+            <h1 className="font-headline-xl text-[28px] sm:text-[32px] md:text-[40px] leading-[36px] md:leading-[48px] tracking-tight font-bold text-on-surface mb-2">
               Settings
             </h1>
-            <p className="text-on-surface-variant font-body-lg text-body-lg">
+            <p className="text-on-surface-variant font-body-lg text-sm sm:text-body-lg">
               Manage your MindEase experience and privacy.
             </p>
           </header>
@@ -73,14 +72,14 @@ function Settings() {
           <div className="space-y-6">
 
             {/* ── Profile Section ───────────────────────────────── */}
-            <div className="bg-white rounded-[2rem] p-6 shadow-[0px_4px_20px_rgba(0,0,0,0.04)] border border-outline-variant/20">
+            <div className="bg-white rounded-[2rem] p-5 sm:p-6 shadow-[0px_4px_20px_rgba(0,0,0,0.04)] border border-outline-variant/20">
               <div className="flex items-center gap-4 mb-6">
                 <div className="bg-secondary-container p-1 rounded-xl">
                   <span className="material-symbols-outlined text-secondary text-[24px]">person</span>
                 </div>
                 <h2 className="font-headline-md text-headline-md text-on-surface">Profile</h2>
               </div>
-              <div className="flex flex-col md:flex-row items-start md:items-center gap-16 mb-6">
+              <div className="flex flex-col md:flex-row items-center md:items-center gap-6 md:gap-12 mb-6 text-center md:text-left">
                 {/* Avatar */}
                 <div className="relative group">
                   <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-surface-container ring-1 ring-primary/10 bg-primary-fixed flex items-center justify-center">
@@ -91,11 +90,11 @@ function Settings() {
                   </button>
                 </div>
                 {/* Name & Email Fields */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1 w-full">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 flex-1 w-full text-left">
                   <div className="space-y-1">
                     <label className="font-label-sm text-label-sm text-on-surface-variant block">Full Name</label>
                     <input
-                      className="w-full bg-surface border-none rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/20 text-on-surface font-body-md"
+                      className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/20 text-on-surface font-body-md"
                       type="text"
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
@@ -104,7 +103,7 @@ function Settings() {
                   <div className="space-y-1">
                     <label className="font-label-sm text-label-sm text-on-surface-variant block">Email Address</label>
                     <input
-                      className="w-full bg-surface border-none rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/20 text-on-surface font-body-md"
+                      className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/20 text-on-surface font-body-md"
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
@@ -117,7 +116,7 @@ function Settings() {
             {/* ── Theme & Notifications (2-column) ─────────────── */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Appearance Card */}
-              <div className="bg-white rounded-[2rem] p-6 shadow-[0px_4px_20px_rgba(0,0,0,0.04)] border border-outline-variant/20 flex flex-col justify-between">
+              <div className="bg-white rounded-[2rem] p-5 sm:p-6 shadow-[0px_4px_20px_rgba(0,0,0,0.04)] border border-outline-variant/20 flex flex-col justify-between">
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-4">
                     <div className="bg-primary-fixed p-1 rounded-xl">
@@ -126,7 +125,7 @@ function Settings() {
                     <h3 className="font-headline-md text-headline-md text-on-surface">Appearance</h3>
                   </div>
                 </div>
-                <div className="flex items-center justify-between p-4 bg-surface rounded-2xl">
+                <div className="flex items-center justify-between p-4 bg-surface-container-low rounded-2xl border border-outline-variant/20">
                   <div>
                     <p className="font-label-md text-label-md text-on-surface">Dark Mode</p>
                     <p className="text-label-sm text-on-surface-variant">Switch to a darker interface</p>
@@ -147,7 +146,7 @@ function Settings() {
               </div>
 
               {/* Notifications Card */}
-              <div className="bg-white rounded-[2rem] p-6 shadow-[0px_4px_20px_rgba(0,0,0,0.04)] border border-outline-variant/20">
+              <div className="bg-white rounded-[2rem] p-5 sm:p-6 shadow-[0px_4px_20px_rgba(0,0,0,0.04)] border border-outline-variant/20">
                 <div className="flex items-center gap-4 mb-6">
                   <div className="bg-secondary-container p-1 rounded-xl">
                     <span className="material-symbols-outlined text-secondary text-[24px]">notifications_active</span>
@@ -155,7 +154,7 @@ function Settings() {
                   <h3 className="font-headline-md text-headline-md text-on-surface">Notifications</h3>
                 </div>
                 <div className="space-y-3">
-                  <label className="flex items-center justify-between p-3 bg-surface rounded-xl cursor-pointer hover:bg-surface-container-low transition-colors">
+                  <label className="flex items-center justify-between p-3 bg-surface-container-low rounded-xl cursor-pointer hover:bg-surface-container transition-colors border border-outline-variant/20">
                     <span className="font-label-md text-label-md">Daily reminders</span>
                     <input
                       checked={dailyReminders}
@@ -164,7 +163,7 @@ function Settings() {
                       type="checkbox"
                     />
                   </label>
-                  <label className="flex items-center justify-between p-3 bg-surface rounded-xl cursor-pointer hover:bg-surface-container-low transition-colors">
+                  <label className="flex items-center justify-between p-3 bg-surface-container-low rounded-xl cursor-pointer hover:bg-surface-container transition-colors border border-outline-variant/20">
                     <span className="font-label-md text-label-md">Clinical updates</span>
                     <input
                       checked={clinicalUpdates}
@@ -178,25 +177,25 @@ function Settings() {
             </div>
 
             {/* ── Security & Privacy ───────────────────────────── */}
-            <div className="bg-white rounded-[2rem] p-6 shadow-[0px_4px_20px_rgba(0,0,0,0.04)] border border-outline-variant/20">
-              <div className="flex items-center gap-4 mb-16">
+            <div className="bg-white rounded-[2rem] p-5 sm:p-6 shadow-[0px_4px_20px_rgba(0,0,0,0.04)] border border-outline-variant/20">
+              <div className="flex items-center gap-4 mb-6 md:mb-10">
                 <div className="bg-tertiary-fixed p-1 rounded-xl">
                   <span className="material-symbols-outlined text-tertiary text-[24px]">security</span>
                 </div>
                 <h3 className="font-headline-md text-headline-md text-on-surface">Security &amp; Privacy</h3>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-12">
                 {/* Account Security */}
-                <div className="space-y-6">
+                <div className="space-y-4 sm:space-y-6">
                   <h4 className="font-label-md text-label-md text-primary uppercase tracking-wider">Account Security</h4>
-                  <button className="w-full flex items-center justify-between p-4 bg-surface rounded-2xl hover:shadow-sm transition-all group">
+                  <button className="w-full flex items-center justify-between p-4 bg-surface-container-low rounded-2xl hover:shadow-sm transition-all group border border-outline-variant/20">
                     <div className="text-left">
                       <p className="font-label-md text-label-md text-on-surface">Change Password</p>
                       <p className="text-label-sm text-on-surface-variant">Last changed 3 months ago</p>
                     </div>
                     <span className="material-symbols-outlined text-on-surface-variant group-hover:translate-x-1 transition-transform">chevron_right</span>
                   </button>
-                  <button className="w-full flex items-center justify-between p-4 bg-surface rounded-2xl hover:shadow-sm transition-all group">
+                  <button className="w-full flex items-center justify-between p-4 bg-surface-container-low rounded-2xl hover:shadow-sm transition-all group border border-outline-variant/20">
                     <div className="text-left">
                       <p className="font-label-md text-label-md text-on-surface">Two-Factor Authentication</p>
                       <p className="text-label-sm text-secondary font-medium">Enabled (SMS)</p>
@@ -205,9 +204,9 @@ function Settings() {
                   </button>
                 </div>
                 {/* Data & Privacy */}
-                <div className="space-y-6">
+                <div className="space-y-4 sm:space-y-6">
                   <h4 className="font-label-md text-label-md text-primary uppercase tracking-wider">Data &amp; Privacy</h4>
-                  <button className="w-full flex items-center justify-between p-4 bg-surface rounded-2xl hover:shadow-sm transition-all group">
+                  <button className="w-full flex items-center justify-between p-4 bg-surface-container-low rounded-2xl hover:shadow-sm transition-all group border border-outline-variant/20">
                     <div className="text-left">
                       <p className="font-label-md text-label-md text-on-surface">Export Your Data</p>
                       <p className="text-label-sm text-on-surface-variant">Download a JSON of your history</p>
@@ -226,20 +225,21 @@ function Settings() {
             </div>
 
             {/* ── Footer Buttons ───────────────────────────────── */}
-            <div className="flex justify-end gap-4 pt-6">
+            <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-4 pt-6">
               <button
                 onClick={handleDiscard}
-                className="px-8 py-3 text-primary font-label-md text-label-md rounded-full border border-primary/20 hover:bg-primary/5 transition-colors"
+                className="w-full sm:w-auto px-8 py-3 text-primary font-label-md text-label-md rounded-full border border-primary/20 hover:bg-primary/5 transition-colors text-center"
               >
                 Discard Changes
               </button>
               <button
                 onClick={handleSave}
-                className="px-8 py-3 bg-primary text-white font-label-md text-label-md rounded-full shadow-lg shadow-primary/20 hover:shadow-xl hover:translate-y-[-2px] active:translate-y-0 transition-all"
+                className="w-full sm:w-auto px-8 py-3 bg-primary text-white font-label-md text-label-md rounded-full shadow-lg shadow-primary/20 hover:shadow-xl hover:translate-y-[-2px] active:translate-y-0 transition-all text-center"
               >
                 Save All Changes
               </button>
             </div>
+
 
           </div>
         </section>

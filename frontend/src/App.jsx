@@ -14,6 +14,7 @@ import LearnMore from './pages/LearnMore';
 import EmergencySupport from './pages/EmergencySupport';
 import Settings from './pages/Settings';
 import Help from './pages/Help';
+import Assessment from './pages/Assessment';
 
 function App() {
   return (
@@ -32,9 +33,11 @@ function App() {
         <Route path="/emergency" element={<EmergencySupport />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/help" element={<Help />} />
+        <Route path="/assessment" element={<Assessment />} />
       </Route>
     </Routes>
   );
 }
+
 
 export default App;

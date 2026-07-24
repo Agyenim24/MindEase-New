@@ -4,21 +4,21 @@ import { IoLogoWhatsapp } from "react-icons/io5";
 
 const Footer = () => {
   return (
-    <footer className="bg-[#EEF2FF] border-t border-gray-200 mt-20">
+    <footer className="bg-surface-container-low border-t border-outline-variant/20 mt-20 transition-colors">
       {/* Top Section */}
       <div className="max-w-7xl mx-auto px-8 py-10 grid grid-cols-1 md:grid-cols-3 gap-16">
         {/* Left */}
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">
+          <h2 className="text-2xl font-bold text-on-surface mb-6">
             MindEase
           </h2>
 
-          <p className="text-gray-600 leading-8 text-lg w-full">
+          <p className="text-on-surface-variant leading-8 text-lg w-full">
             Professional care for a modern world. Empowering your
             mental health journey with technology and empathy.
           </p>
 
-          <p className="mt-8 text-red-600 font-bold uppercase text-sm leading-6">
+          <p className="mt-8 text-error font-bold uppercase text-sm leading-6">
             Emergency: If you are in crisis, please contact emergency
             services or a suicide prevention hotline immediately.
           </p>
@@ -28,15 +28,15 @@ const Footer = () => {
         <div className="md:col-span-2 flex flex-col sm:flex-row justify-end gap-20">
           {/* Company */}
           <div>
-            <h3 className="font-bold text-gray-900 mb-6">
+            <h3 className="font-bold text-on-surface mb-6">
               Company
             </h3>
 
-            <ul className="space-y-5 text-gray-600">
+            <ul className="space-y-5 text-on-surface-variant">
               <li>
                 <Link
                   to="/resources"
-                  className="hover:text-blue-600 transition"
+                  className="hover:text-primary transition"
                 >
                   Resources
                 </Link>
@@ -45,7 +45,7 @@ const Footer = () => {
               <li>
                 <Link
                   to="/programs"
-                  className="hover:text-blue-600 transition"
+                  className="hover:text-primary transition"
                 >
                   Programs
                 </Link>
@@ -54,7 +54,7 @@ const Footer = () => {
               <li>
                 <Link
                   to="/community"
-                  className="hover:text-blue-600 transition"
+                  className="hover:text-primary transition"
                 >
                   Community
                 </Link>
@@ -64,15 +64,15 @@ const Footer = () => {
 
           {/* Legal */}
           <div>
-            <h3 className="font-bold text-gray-900 mb-6">
+            <h3 className="font-bold text-on-surface mb-6">
               Legal
             </h3>
 
-            <ul className="space-y-5 text-gray-600">
+            <ul className="space-y-5 text-on-surface-variant">
               <li>
                 <Link
                   to="/privacy"
-                  className="hover:text-blue-600 transition"
+                  className="hover:text-primary transition"
                 >
                   Privacy Policy
                 </Link>
@@ -81,7 +81,7 @@ const Footer = () => {
               <li>
                 <Link
                   to="/terms"
-                  className="hover:text-blue-600 transition"
+                  className="hover:text-primary transition"
                 >
                   Terms of Service
                 </Link>
@@ -90,7 +90,7 @@ const Footer = () => {
               <li>
                 <Link
                   to="/clinical"
-                  className="hover:text-blue-600 transition"
+                  className="hover:text-primary transition"
                 >
                   Clinical Resources
                 </Link>
@@ -99,7 +99,7 @@ const Footer = () => {
               <li>
                 <Link
                   to="/emergency"
-                  className="hover:text-blue-600 transition"
+                  className="hover:text-primary transition"
                 >
                   Emergency Help
                 </Link>
@@ -110,22 +110,22 @@ const Footer = () => {
       </div>
 
       {/* Bottom Bar */}
-      <div className="border-t border-gray-300">
+      <div className="border-t border-outline-variant/20">
         <div className="max-w-7xl mx-auto px-8 py-6 flex flex-col md:flex-row justify-between items-center gap-6">
-          <p className="text-gray-600 text-base">
+          <p className="text-on-surface-variant text-base">
             © 2026 MindEase. Professional care for a modern world.
           </p>
 
-          <div className="flex items-center gap-6 text-gray-600 text-xl">
-            <button className="hover:text-blue-600 transition">
+          <div className="flex items-center gap-6 text-on-surface-variant text-xl">
+            <button className="hover:text-primary transition">
               <FaVolumeUp />
             </button>
 
-            <button className="hover:text-blue-600 transition">
+            <button className="hover:text-primary transition">
               <IoLogoWhatsapp />
             </button>
 
-            <button className="hover:text-blue-600 transition">
+            <button className="hover:text-primary transition">
               <FaGlobe />
             </button>
           </div>
@@ -135,4 +135,4 @@ const Footer = () => {
   );
 };
 
-export default Footer;
+export default Footer;

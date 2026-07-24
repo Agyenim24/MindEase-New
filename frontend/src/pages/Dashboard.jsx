@@ -163,7 +163,7 @@ function Dashboard() {
               <div className="rounded-3xl overflow-hidden aspect-video shadow-2xl relative">
                 <img className="w-full h-full object-cover" data-alt="A serene landscape photo showing a calm lake at dawn with misty mountains in the background, reflecting a soft blue and lavender sky. The lighting is high-key and ethereal, evoking a sense of profound tranquility and professional mindfulness. The composition is minimal and balanced, perfectly aligning with a modern wellness application aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuALa-ydEYnZs0JrF1Sp9-UPPWttLG_MVhoe_xuOeedhiODktRg_-CffinPyZyaaCFE_0m9F0xVbgoMfzJRpYKsInZMhJ4W6mLkOW8xS3p4_E5DPCmKfoGJ0_u5WkNJGVybCMmZx71ZP4UmbwoAR7FhPJakRZ9M__X1K06RT08F7ZPUIREB-hmD2rHnJlJtLTnM5W46XOStnSjbAn30BrHkdTRIQjvpk7jhxgdaUoC3nEG24TpyuMvMI0D_mclD5h7gYHTLBFzM7-UvT" alt="Serene landscape" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
-                <div className="absolute bottom-6 left-6 text-white italic font-body-md text-body-md max-w-xs">
+                <div className="absolute bottom-6 left-6 text-white italic font-body-md text-body-md max-w-full">
                   "Peace begins with a smile." — Mother Teresa
                 </div>
               </div>

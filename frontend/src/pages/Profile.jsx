@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useLayout } from '../components/Layout';
+import { useTheme } from '../context/ThemeContext';
 
 const DEFAULT_AVATAR = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80';
 
@@ -22,6 +23,7 @@ const moodBars = [
 
 function Profile() {
   const { toggleMobileMenu } = useLayout();
+  const { darkMode, setDarkMode } = useTheme();
   const avatarInputRef = useRef(null);
   const docInputRef = useRef(null);
 
@@ -34,7 +36,7 @@ function Profile() {
   const [userBio, setUserBio] = useState('Maintaining a 12-day mindfulness streak. "One day at a time, finding peace in the present."');
   const [userLocation] = useState('Seattle, WA');
   const [dailyReminders, setDailyReminders] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
+
 
   // Uploaded documents state
   const [documents, setDocuments] = useState([
@@ -158,9 +160,9 @@ function Profile() {
               </button>
             </div>
 
-            <div className="text-center md:text-left space-y-2 flex-1 w-full">
+            <div className="text-center md:text-left space-y-2 w-full">
               <h2 className="font-headline-lg text-[30px] font-bold text-on-surface">{userName}</h2>
-              <p className="font-body-md text-on-surface-variant w-full max-w-full text-sm">{userBio}</p>
+              <p className="font-body-md text-on-surface-variant max-w-full text-sm">{userBio}</p>
               <div className="flex flex-wrap gap-2 pt-2 justify-center md:justify-start">
                 <span className="px-3 py-1 bg-secondary-container text-on-secondary-container text-xs font-bold rounded-full">
                   Pro Member
@@ -334,9 +336,9 @@ function Profile() {
           </section>
 
           {/* ── Quick Crisis Support CTA Section ────────────── */}
-          <section className="mt-10 text-center p-8 bg-surface-container rounded-[2rem] border border-primary/10 space-y-4">
+          <section className="mt-10 text-center p-8 bg-surface-container  rounded-[2rem] border border-primary/10 space-y-4">
             <h3 className="font-headline-md text-xl font-bold text-on-surface">Need to talk to someone right now?</h3>
-            <p className="text-xs text-on-surface-variant max-w-lg mx-auto leading-relaxed">
+            <p className="text-xs text-on-surface-variant max-w-full  mx-auto leading-relaxed">
               Our crisis team is available 24/7. Don't hesitate to reach out if you're feeling overwhelmed.
             </p>
             <div className="flex flex-wrap justify-center gap-4 pt-2">

@@ -73,6 +73,7 @@ function Layout() {
                   {[
                     { name: 'Home', path: '/', icon: 'home' },
                     { name: 'Dashboard', path: '/dashboard', icon: 'dashboard' },
+                    { name: 'Take Assessment', path: '/assessment', icon: 'psychology' },
                     { name: 'Programs', path: '/programs', icon: 'apps' },
                     { name: 'Community', path: '/community', icon: 'group' },
                     { name: 'Resources', path: '/resources', icon: 'menu_book' },
@@ -83,6 +84,7 @@ function Layout() {
                       key={item.name}
                       to={item.path}
                       onClick={closeMobileMenu}
+
                       end={item.path === '/'}
                       className={({ isActive }) =>
                         `rounded-xl flex items-center gap-3 px-4 py-3 transition-all ${

@@ -230,23 +230,24 @@ function Chat() {
     <div className="flex-1 flex flex-col min-h-0 overflow-hidden relative">
       {/* TopAppBar Context */}
       <header className="h-20 w-full flex justify-between items-center px-margin-mobile md:px-margin-desktop bg-surface/80 backdrop-blur-xl border-b border-outline-variant/30 shrink-0 z-20 relative">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           <button onClick={toggleMobileMenu} className="md:hidden text-primary p-2">
             <span className="material-symbols-outlined">menu</span>
           </button>
           <div>
-            <h2 className="font-headline-md text-headline-md font-bold text-primary flex items-center gap-2">
+            <h2 className="text-base sm:text-headline-md font-bold text-primary flex items-center gap-1.5 sm:gap-2">
               <span>MindEase Assistant</span>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 hidden xs:inline-block">
                 {aiTone}
               </span>
             </h2>
-            <p className="text-[12px] text-secondary flex items-center gap-1">
+            <p className="text-[11px] sm:text-[12px] text-secondary flex items-center gap-1">
               <span className={`w-2 h-2 rounded-full ${isLoading ? 'bg-amber-400' : 'bg-secondary'} animate-pulse`}></span>
               {isLoading ? 'Thinking…' : 'AI Companion Online'}
             </p>
           </div>
         </div>
+
 
         <div className="flex items-center gap-2 relative">
           {/* History Icon Button */}

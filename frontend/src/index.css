@@ -209,6 +209,25 @@ body {
     box-shadow: 0 10px 30px -5px rgba(0, 89, 186, 0.04);
 }
 
+@keyframes float {
+    0%   { transform: translateY(0px); }
+    50%  { transform: translateY(-12px); }
+    100% { transform: translateY(0px); }
+}
+
+.animate-float {
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes slide-up {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-slide-up {
+    animation: slide-up 0.45s ease-out both;
+}
+
 .auth-card-shadow {
     box-shadow: 0 20px 60px -10px rgba(0, 89, 186, 0.12), 0 4px 16px -4px rgba(0, 0, 0, 0.06);
 }
@@ -463,3 +482,136 @@ body {
         background-color: #d7e2ff;
     }
 }
+
+/* ─────────────────────────────────────────────────────────────
+   Dark Mode Theme Overrides & Styling Rules
+   ───────────────────────────────────────────────────────────── */
+html.dark {
+    color-scheme: dark;
+
+    /* Dark surface and background variables */
+    --color-background: #0b1320;
+    --color-surface: #121e30;
+    --color-surface-dim: #0b1320;
+    --color-surface-bright: #1b2a42;
+    --color-surface-container-lowest: #0d1728;
+    --color-surface-container-low: #16243b;
+    --color-surface-container: #1d2e4a;
+    --color-surface-container-high: #263a5c;
+    --color-surface-container-highest: #30466e;
+    --color-surface-variant: #1d2e4a;
+
+    /* Text & Icon contrast colors */
+    --color-on-background: #f8fafc;
+    --color-on-surface: #f8fafc;
+    --color-on-surface-variant: #94a3b8;
+    --color-outline: #64748b;
+    --color-outline-variant: #334155;
+
+    /* Primary palette in Dark mode */
+    --color-primary: #3b82f6;
+    --color-primary-container: #1d4ed8;
+    --color-on-primary: #ffffff;
+    --color-on-primary-container: #eff6ff;
+    --color-primary-fixed: #1e3a8a;
+    --color-primary-fixed-dim: #1e40af;
+    --color-on-primary-fixed: #dbeafe;
+    --color-on-primary-fixed-variant: #93c5fd;
+
+    /* Secondary palette in Dark mode */
+    --color-secondary: #10b981;
+    --color-secondary-container: #064e3b;
+    --color-on-secondary: #ffffff;
+    --color-on-secondary-container: #d1fae5;
+    --color-secondary-fixed: #065f46;
+    --color-secondary-fixed-dim: #047857;
+    --color-on-secondary-fixed: #ecfdf5;
+    --color-on-secondary-fixed-variant: #a7f3d0;
+
+    /* Tertiary palette in Dark mode */
+    --color-tertiary: #818cf8;
+    --color-tertiary-container: #312e81;
+    --color-on-tertiary: #ffffff;
+    --color-on-tertiary-container: #e0e7ff;
+    --color-tertiary-fixed: #3730a3;
+    --color-tertiary-fixed-dim: #4338ca;
+    --color-on-tertiary-fixed: #e0e7ff;
+    --color-on-tertiary-fixed-variant: #c7d2fe;
+
+    /* Error palette */
+    --color-error: #f87171;
+    --color-error-container: #7f1d1d;
+    --color-on-error: #ffffff;
+    --color-on-error-container: #fecaca;
+
+    /* Inverse theme */
+    --color-inverse-surface: #f8fafc;
+    --color-inverse-on-surface: #0b1320;
+    --color-inverse-primary: #3b82f6;
+}
+
+html.dark body {
+    background-color: var(--color-background);
+    color: var(--color-on-surface);
+}
+
+/* Card & container overrides for elements using explicit bg-white */
+html.dark .bg-white {
+    background-color: #121e30 !important;
+}
+
+html.dark .bg-white\/80 {
+    background-color: rgba(18, 30, 48, 0.85) !important;
+}
+
+html.dark .bg-white\/90 {
+    background-color: rgba(18, 30, 48, 0.9) !important;
+}
+
+html.dark .bg-white\/10 {
+    background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+html.dark .bg-surface\/80 {
+    background-color: rgba(18, 30, 48, 0.85) !important;
+}
+
+html.dark .border-outline-variant\/20,
+html.dark .border-outline-variant\/30,
+html.dark .border-outline-variant\/10 {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+html.dark input, 
+html.dark select, 
+html.dark textarea {
+    color: var(--color-on-surface);
+}
+
+html.dark input::placeholder, 
+html.dark textarea::placeholder {
+    color: var(--color-on-surface-variant);
+}
+
+html.dark .glass-card,
+html.dark .glass-panel {
+    background: rgba(18, 30, 48, 0.75) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+html.dark .glass-nav {
+    background: rgba(11, 19, 32, 0.85) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+html.dark .auth-left-panel {
+    background: linear-gradient(135deg, #0b1320 0%, #16243b 50%, #1d2e4a 100%) !important;
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+    background: #263a5c;
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+    background: #30466e;
+}

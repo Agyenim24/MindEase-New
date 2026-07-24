@@ -158,21 +158,29 @@ function Programs() {
           </section>
 
           {/* Recommendation Section */}
-          <section className="bg-gray-200 p-8 rounded-xl flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex-1">
-              <h2 className="font-headline-md text-headline-md text-on-surfac">
+          <section className="bg-gradient-to-r from-primary-container/30 to-secondary-container/20 p-8 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-6 border border-outline-variant/20">
+            <div className="flex-1 space-y-2">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="material-symbols-outlined text-primary text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>psychology</span>
+                <span className="text-xs font-bold uppercase tracking-wider text-primary">Personalized Match</span>
+              </div>
+              <h2 className="font-headline-md text-headline-md text-on-surface">
                 Not sure where to start?
               </h2>
-
-              <p className="text-sm mt-4">
+              <p className="text-on-surface-variant text-sm leading-relaxed">
                 Take our 2-minute assessment to find the program that matches your current emotional needs and goals.
               </p>
             </div>
 
-            <button className="px-8 py-3 bg-black text-white cursor-pointer rounded-full font-semibold whitespace-nowrap hover:bg-gray-700 transition">
-              Take Assessment
-            </button>
+            <Link
+              to="/assessment"
+              className="px-8 py-3.5 bg-primary text-white rounded-full font-bold whitespace-nowrap hover:opacity-90 hover:-translate-y-0.5 active:scale-95 transition-all shadow-lg shadow-primary/20 flex items-center gap-2"
+            >
+              <span>Take Assessment</span>
+              <span className="material-symbols-outlined text-base">arrow_forward</span>
+            </Link>
           </section>
+
         </div>
         <Footer />
       </div>
