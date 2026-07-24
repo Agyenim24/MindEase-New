@@ -15,7 +15,6 @@ function LandingPage() {
             <Link to="/community" className="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md">Community</Link>
           </div>
         </div>
-<<<<<<< HEAD
         <div className="flex items-center gap-4">
           <Link to="/login" className="hidden md:block text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md">Login</Link>
           <Link to="/signup" className="bg-primary text-on-primary px-6 py-2.5 rounded-full font-label-md text-label-md hover:opacity-90 active:scale-95 transition-all">Get Started</Link>
@@ -257,11 +256,6 @@ function LandingPage() {
       {/* Footer */}
       <Footer />
     </div>
-=======
-        
-      </section>
-    </>
->>>>>>> ec8e21865dde0195edfa95d2084b06ce6a3711af
   );
 }
 
