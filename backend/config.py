@@ -4,25 +4,24 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class Config:
-    # App
+    # App Settings
     APP_NAME        = "MindEase"
     DEBUG           = os.getenv("DEBUG", "true").lower() == "true"
     SECRET_KEY      = os.getenv("SECRET_KEY", "mindease-dev-secret-key")
 
-    # Database
-    BASE_DIR        = os.path.abspath(os.path.dirname(__file__))
-    SQLALCHEMY_DATABASE_URI = os.getenv(
-        "DATABASE_URL",
-        f"sqlite:///{os.path.join(BASE_DIR, '../database/mindease.db')}"
-    )
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    # MongoDB
+    MONGO_URI       = os.getenv("MONGO_URI")
 
-    # Session (Anonymous ID)
+    # JWT
+    JWT_SECRET_KEY          = os.getenv("SECRET_KEY", "mindease-dev-secret-key")
+    JWT_ACCESS_TOKEN_EXPIRES  = 30 * 24 * 60 * 60  # 30 days in seconds
+
+    # Session (Anonymous ID) 
     SESSION_ID_HEADER = "X-Session-ID"
 
     # ML Model
     MODEL_NAME      = "distilbert-base-uncased"
-    MODEL_PATH      = os.path.join(BASE_DIR, "ml/model/saved_model")
+    MODEL_PATH      = os.path.join(os.path.abspath(os.path.dirname(__file__)), "ml/model/saved_model")
     MAX_TOKEN_LEN   = 128
 
     # Emotion Labels
@@ -43,7 +42,7 @@ class Config:
     DEFAULT_LANGUAGE = "en"
 
     # Report
-    REPORT_OUTPUT_DIR = os.path.join(BASE_DIR, "../database/reports")
+    REPORT_OUTPUT_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), "../database/reports")
 
     # CORS
     CORS_ORIGINS = os.getenv("CORS_ORIGINS", "http://localhost:5173").split(",")
