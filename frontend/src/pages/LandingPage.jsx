@@ -44,9 +44,9 @@ function LandingPage() {
                 Learn More
               </Link>
             </div>
-            {/* Hero Artwork Placeholder */}
+            {/* Hero Artwork */}
             <div className="relative w-full aspect-video md:aspect-[21/9] rounded-3xl overflow-hidden shadow-2xl border border-outline-variant/20">
-              <img className="w-full h-full object-cover" data-alt="A serene and minimalist 3D digital landscape showing a peaceful zen garden at dawn. Soft pastel blues, lavenders, and mint greens dominate the palette, creating a therapeutic atmosphere. Gentle rippling water and abstract glass-like sculptures reflect soft morning light. The composition is clean, airy, and evokes a feeling of profound mental clarity and quietude." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDCjfJPs0HUmTaq5TRpk7pzjKQ2Jml2OUhJfnZK2di54KAAC1c8RhyTc2IBIi6ygcUVtGdNfoMDikZaZTQPymi7TSk2lWtNu9uFfwcb3vkxALRjR80QWANmXCLfdCZf4Kkq4Yg8b5XCPLho2pIbxSwVTvELWsfddJSlI7Ufbn6ycyqDKYvT8Evge_xnXJmpex71-LEaiLN1I4IDHrmLzx8kK1zjnIkwIbvyah7mAgfgXnajzKSc-p5fOwoOxTwB04PfSGpKEdPEuwO1" alt="Peaceful zen garden at dawn" />
+              <img className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDCjfJPs0HUmTaq5TRpk7pzjKQ2Jml2OUhJfnZK2di54KAAC1c8RhyTc2IBIi6ygcUVtGdNfoMDikZaZTQPymi7TSk2lWtNu9uFfwcb3vkxALRjR80QWANmXCLfdCZf4Kkq4Yg8b5XCPLho2pIbxSwVTvELWsfddJSlI7Ufbn6ycyqDKYvT8Evge_xnXJmpex71-LEaiLN1I4IDHrmLzx8kK1zjnIkwIbvyah7mAgfgXnajzKSc-p5fOwoOxTwB04PfSGpKEdPEuwO1" alt="Peaceful zen garden at dawn" />
               <div className="absolute inset-0 bg-gradient-to-t from-background/40 to-transparent"></div>
             </div>
           </div>
@@ -92,7 +92,7 @@ function LandingPage() {
           <div className="container mx-auto px-margin-mobile md:px-margin-desktop">
             <div className="text-center mb-16">
               <h2 className="font-headline-lg text-headline-lg text-on-surface mb-4">How MindEase Works</h2>
-              <p className="font-body-md text-body-md text-on-surface-variant w-full mx-auto ">Three simple steps to start your journey toward a calmer mind.</p>
+              <p className="font-body-md text-body-md text-on-surface-variant w-full mx-auto">Three simple steps to start your journey toward a calmer mind.</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
               <div className="relative flex flex-col items-center text-center">
@@ -104,79 +104,27 @@ function LandingPage() {
                 <div className="hidden md:block absolute top-10 -right-6 w-12 h-[2px] bg-outline-variant/30"></div>
               </div>
               <div className="relative flex flex-col items-center text-center">
-                <div className="w-20 h-20 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container mb-6 shadow-md">
+                <div className="w-20 h-20 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container mb-6 shadow-md">
                   <span className="material-symbols-outlined text-3xl">psychology</span>
                 </div>
-                <h4 className="font-headline-md text-headline-md text-on-surface mb-3">AI Understands</h4>
-                <p className="font-body-md text-body-md text-on-surface-variant">Our empathetic AI analyzes your mood and identifies emotional patterns.</p>
+                <h4 className="font-headline-md text-headline-md text-on-surface mb-3">Receive Insights</h4>
+                <p className="font-body-md text-body-md text-on-surface-variant">Our AI provides immediate, customized tools and grounding exercises tailored to you.</p>
                 <div className="hidden md:block absolute top-10 -right-6 w-12 h-[2px] bg-outline-variant/30"></div>
               </div>
-              <div className="flex flex-col items-center text-center">
-                <div className="w-20 h-20 rounded-full bg-tertiary-fixed flex items-center justify-center text-on-tertiary-fixed-variant mb-6 shadow-md">
-                  <span className="material-symbols-outlined text-3xl">volunteer_activism</span>
+              <div className="relative flex flex-col items-center text-center">
+                <div className="w-20 h-20 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container mb-6 shadow-md">
+                  <span className="material-symbols-outlined text-3xl">wb_sunny</span>
                 </div>
-                <h4 className="font-headline-md text-headline-md text-on-surface mb-3">Receive Support</h4>
-                <p className="font-body-md text-body-md text-on-surface-variant">Get personalized exercises, reflections, and actionable advice instantly.</p>
+                <h4 className="font-headline-md text-headline-md text-on-surface mb-3">Track Progress</h4>
+                <p className="font-body-md text-body-md text-on-surface-variant">Build daily habits over time to see tangible growth in clarity and peace of mind.</p>
               </div>
             </div>
           </div>
         </section>
+      </main>
 
-        {/* Features Bento Grid */}
-        <section className="py-xl md:py-32 bg-surface-container-low">
-          <div className="container mx-auto px-margin-mobile md:px-margin-desktop">
-            <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
-              <div className="max-w-2xl">
-                <h2 className="font-headline-lg text-headline-lg text-on-surface mb-4">Comprehensive Tools for Your Mind</h2>
-                <p className="font-body-md text-body-md text-on-surface-variant">Discover our science-backed features designed to nurture your mental well-being every day.</p>
-              </div>
-              <button className="text-primary font-label-md text-label-md flex items-center gap-1 hover:gap-2 transition-all">
-                View all features <span className="material-symbols-outlined">arrow_forward</span>
-              </button>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-6 grid-rows-auto gap-gutter">
-              <div className="md:col-span-3 p-8 bg-surface rounded-[2rem] border border-outline-variant/10 shadow-sm hover:shadow-md transition-shadow group">
-                <div className="w-12 h-12 rounded-xl bg-error-container text-on-error-container flex items-center justify-center mb-6">
-                  <span className="material-symbols-outlined">monitor_heart</span>
-                </div>
-                <h3 className="font-headline-md text-headline-md text-on-surface mb-3">Stress Detection</h3>
-                <p className="font-body-md text-body-md text-on-surface-variant">Automatic analysis of language patterns to detect rising stress levels before they become overwhelming.</p>
-              </div>
-              <div className="md:col-span-3 p-8 bg-surface rounded-[2rem] border border-outline-variant/10 shadow-sm hover:shadow-md transition-shadow">
-                <div className="w-12 h-12 rounded-xl bg-primary-fixed text-on-primary-fixed-variant flex items-center justify-center mb-6">
-                  <span className="material-symbols-outlined">spa</span>
-                </div>
-                <h3 className="font-headline-md text-headline-md text-on-surface mb-3">Anxiety Support</h3>
-                <p className="font-body-md text-body-md text-on-surface-variant">Real-time grounding techniques and anxiety-reduction protocols during periods of high distress.</p>
-              </div>
-              <div className="md:col-span-2 p-8 bg-surface rounded-[2rem] border border-outline-variant/10 shadow-sm hover:shadow-md transition-shadow">
-                <div className="w-12 h-12 rounded-xl bg-secondary-container text-on-secondary-container flex items-center justify-center mb-6">
-                  <span className="material-symbols-outlined">air</span>
-                </div>
-                <h3 className="font-headline-md text-headline-md text-on-surface mb-3">Breathing</h3>
-                <p className="font-body-md text-body-md text-on-surface-variant">Guided rhythmic breathing exercises to activate your body's relaxation response.</p>
-              </div>
-              <div className="md:col-span-2 p-8 bg-surface rounded-[2rem] border border-outline-variant/10 shadow-sm hover:shadow-md transition-shadow">
-                <div className="w-12 h-12 rounded-xl bg-tertiary-fixed text-on-tertiary-fixed-variant flex items-center justify-center mb-6">
-                  <span className="material-symbols-outlined">self_improvement</span>
-                </div>
-                <h3 className="font-headline-md text-headline-md text-on-surface mb-3">Mindfulness</h3>
-                <p className="font-body-md text-body-md text-on-surface-variant">Short, accessible meditation sessions for focus and mental presence.</p>
-              </div>
-              <div className="md:col-span-2 p-8 bg-surface rounded-[2rem] border border-outline-variant/10 shadow-sm hover:shadow-md transition-shadow">
-                <div className="w-12 h-12 rounded-xl bg-surface-container-high text-on-primary-fixed-variant flex items-center justify-center mb-6">
-                  <span className="material-symbols-outlined">history_edu</span>
-                </div>
-                <h3 className="font-headline-md text-headline-md text-on-surface mb-3">CBT Reflection</h3>
-                <p className="font-body-md text-body-md text-on-surface-variant">Structured Cognitive Behavioral Therapy tools for reframing negative thought patterns.</p>
-              </div>
-            </div>
-
-          </div>
-        </div>
-        <Footer/>
-      </section>
-    </>
+      <Footer />
+    </div>
   );
 }
 
