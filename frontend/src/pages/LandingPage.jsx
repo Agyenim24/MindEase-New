@@ -171,91 +171,12 @@ function LandingPage() {
                 <p className="font-body-md text-body-md text-on-surface-variant">Structured Cognitive Behavioral Therapy tools for reframing negative thought patterns.</p>
               </div>
             </div>
-          </div>
-        </section>
 
-        {/* Stats Section */}
-        <section className="py-xl bg-primary text-on-primary">
-          <div className="container mx-auto px-margin-mobile md:px-margin-desktop grid grid-cols-2 md:grid-cols-4 gap-12 text-center">
-            <div>
-              <p className="font-headline-xl text-headline-xl mb-1">500k+</p>
-              <p className="font-label-md text-label-md opacity-80 uppercase tracking-wider">Users Supported</p>
-            </div>
-            <div>
-              <p className="font-headline-xl text-headline-xl mb-1">12M+</p>
-              <p className="font-label-md text-label-md opacity-80 uppercase tracking-wider">Sessions Completed</p>
-            </div>
-            <div>
-              <p className="font-headline-xl text-headline-xl mb-1">4.9/5</p>
-              <p className="font-label-md text-label-md opacity-80 uppercase tracking-wider">User Rating</p>
-            </div>
-            <div>
-              <p className="font-headline-xl text-headline-xl mb-1">24/7</p>
-              <p className="font-label-md text-label-md opacity-80 uppercase tracking-wider">Active Support</p>
-            </div>
           </div>
-        </section>
-
-        {/* FAQ Section */}
-        <section className="py-xl md:py-32 bg-background">
-          <div className="container mx-auto px-margin-mobile md:px-margin-desktop max-w-3xl">
-            <div className="text-center mb-16">
-              <h2 className="font-headline-lg text-headline-lg text-on-surface mb-4">Frequently Asked Questions</h2>
-              <p className="font-body-md text-body-md text-on-surface-variant">Have questions? We have answers.</p>
-            </div>
-            <div className="space-y-4">
-              <details className="group bg-surface rounded-2xl border border-outline-variant/20 p-6 open:shadow-md transition-all">
-                <summary className="flex justify-between items-center cursor-pointer list-none">
-                  <span className="font-label-md text-label-md text-on-surface">Is MindEase a replacement for therapy?</span>
-                  <span className="material-symbols-outlined transition-transform group-open:rotate-180">expand_more</span>
-                </summary>
-                <div className="mt-4 font-body-md text-body-md text-on-surface-variant">
-                  No, MindEase is designed to complement professional care, not replace it. It provides immediate support and habit tracking, but for clinical conditions, we recommend consulting a licensed therapist.
-                </div>
-              </details>
-              <details className="group bg-surface rounded-2xl border border-outline-variant/20 p-6 open:shadow-md transition-all">
-                <summary className="flex justify-between items-center cursor-pointer list-none">
-                  <span className="font-label-md text-label-md text-on-surface">How secure is my personal data?</span>
-                  <span className="material-symbols-outlined transition-transform group-open:rotate-180">expand_more</span>
-                </summary>
-                <div className="mt-4 font-body-md text-body-md text-on-surface-variant">
-                  Your privacy is our priority. All conversations are end-to-end encrypted, and we never sell your data to third parties. We are fully HIPAA and GDPR compliant.
-                </div>
-              </details>
-              <details className="group bg-surface rounded-2xl border border-outline-variant/20 p-6 open:shadow-md transition-all">
-                <summary className="flex justify-between items-center cursor-pointer list-none">
-                  <span className="font-label-md text-label-md text-on-surface">What makes the AI "empathetic"?</span>
-                  <span className="material-symbols-outlined transition-transform group-open:rotate-180">expand_more</span>
-                </summary>
-                <div className="mt-4 font-body-md text-body-md text-on-surface-variant">
-                  Our AI models are trained on millions of therapeutic interactions and supervised by psychologists to ensure the tone is supportive, validating, and ethically sound.
-                </div>
-              </details>
-            </div>
-          </div>
-        </section>
-
-        {/* CTA Section */}
-        <section className="py-xl mb-xl">
-          <div className="container mx-auto px-margin-mobile md:px-margin-desktop">
-            <div className="bg-primary-container text-on-primary-container rounded-[3rem] p-12 md:p-20 text-center relative overflow-hidden">
-              <div className="relative z-10">
-                <h2 className="font-headline-xl-mobile md:font-headline-xl text-headline-xl-mobile md:text-headline-xl mb-6">Ready to find your peace?</h2>
-                <p className="font-body-lg text-body-lg mb-10 opacity-90 max-w-2xl mx-auto">Join thousands of others who are managing their stress and building emotional resilience with MindEase.</p>
-                <Link to="/signup" className="inline-block bg-surface text-primary px-10 py-5 rounded-full font-label-md text-label-md hover:opacity-95 active:scale-95 transition-all shadow-xl">
-                  Start Your Free Trial
-                </Link>
-              </div>
-              <div className="absolute -top-24 -left-24 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
-              <div className="absolute -bottom-24 -right-24 w-80 h-80 bg-secondary-container/20 rounded-full blur-3xl"></div>
-            </div>
-          </div>
-        </section>
-      </main>
-
-      {/* Footer */}
-      <Footer />
-    </div>
+        </div>
+        <Footer/>
+      </section>
+    </>
   );
 }
 
