@@ -1,11 +1,13 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_socketio import SocketIO
+from flask_jwt_extended import JWTManager
 from config import config
-from models import db
+from models import mongo
 import os
 
 socketio = SocketIO()
+jwt      = JWTManager()
 
 def create_app(env: str = "default") -> Flask:
     app = Flask(__name__)
@@ -14,7 +16,8 @@ def create_app(env: str = "default") -> Flask:
     app.config.from_object(config[env])
 
     # Extensions
-    db.init_app(app)
+    mongo.init_app(app)
+    jwt.init_app(app)
     CORS(app, origins=app.config["CORS_ORIGINS"])
     socketio.init_app(app,
         cors_allowed_origins="*",
@@ -24,15 +27,17 @@ def create_app(env: str = "default") -> Flask:
     )
 
     # Register Blueprints
-    from routes.chat   import chat_bp
-    from routes.mood   import mood_bp
-    from routes.report import report_bp
-    from routes.call   import call_bp
+    from routes.chat    import chat_bp
+    from routes.mood    import mood_bp
+    from routes.report  import report_bp
+    from routes.call    import call_bp
+    from routes.auth    import auth_bp
 
     app.register_blueprint(chat_bp)
     app.register_blueprint(mood_bp)
     app.register_blueprint(report_bp)
     app.register_blueprint(call_bp)
+    app.register_blueprint(auth_bp)
 
     # Register Socket Events
     from socket_events.call_events      import register_call_events
@@ -40,10 +45,6 @@ def create_app(env: str = "default") -> Flask:
 
     register_call_events(socketio)
     register_volunteer_events(socketio)
-
-    # Create DB Tables
-    with app.app_context():
-        db.create_all()
 
     # Health Check
     @app.route("/api/health")
