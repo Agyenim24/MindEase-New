@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from models import db, Session
+from models import get_db
 from services.chat_service import handle_message, get_chat_history, log_mood_summary
 from utils.validators import validate_session_id, validate_message
 from datetime import datetime
@@ -7,14 +7,22 @@ from datetime import datetime
 chat_bp = Blueprint("chat", __name__, url_prefix="/api/chat")
 
 
-def get_or_create_session(session_id: str, language: str = "en") -> Session:
-    session = Session.query.filter_by(session_id=session_id).first()
+def get_or_create_session(session_id: str, language: str = "en"):
+    """Get existing session or create a new one in MongoDB."""
+    db = get_db()
+    session = db.sessions.find_one({"session_id": session_id})
     if not session:
-        session = Session(session_id=session_id, language=language)
-        db.session.add(session)
-    session.last_seen = datetime.utcnow()
-    db.session.commit()
-    return session
+        db.sessions.insert_one({
+            "session_id": session_id,
+            "language":   language,
+            "created_at": datetime.utcnow().isoformat(),
+            "last_seen":  datetime.utcnow().isoformat()
+        })
+    else:
+        db.sessions.update_one(
+            {"session_id": session_id},
+            {"$set": {"last_seen": datetime.utcnow().isoformat()}}
+        )
 
 
 @chat_bp.route("/message", methods=["POST"])
@@ -58,9 +66,6 @@ def end_session():
 
 @chat_bp.route("/reaction", methods=["POST"])
 def add_reaction():
-    from models import Message
-    from models.reaction import Reaction
-
     data       = request.get_json()
     message_id = data.get("message_id")
     reaction   = data.get("reaction")
@@ -68,11 +73,14 @@ def add_reaction():
     if reaction not in ("up", "down"):
         return jsonify({"error": "Reaction must be 'up' or 'down'"}), 400
 
-    msg = Message.query.get(message_id)
+    db  = get_db()
+    msg = db.messages.find_one({"_id": message_id})
     if not msg:
         return jsonify({"error": "Message not found"}), 404
 
-    r = Reaction(message_id=message_id, reaction=reaction)
-    db.session.add(r)
-    db.session.commit()
+    db.reactions.insert_one({
+        "message_id": message_id,
+        "reaction":   reaction,
+        "created_at": datetime.utcnow().isoformat()
+    })
     return jsonify({"message": "Reaction saved"}), 201
