@@ -1,9 +1,10 @@
-from models import db, Message, MoodLog
+from models import get_db
 from services.emotion_service import detect_emotion
 from services.crisis_service  import is_crisis, get_crisis_response
 from services.coping_service  import format_bot_message
 from datetime import datetime
 import json
+import uuid
 
 
 def handle_message(session_id: str, user_text: str, language: str = "en") -> dict:
@@ -15,43 +16,47 @@ def handle_message(session_id: str, user_text: str, language: str = "en") -> dic
     4. Save both messages
     5. Return full response payload
     """
+    db = get_db()
+
     # 1. Detect emotion
     emotion_result = detect_emotion(user_text)
     emotion        = emotion_result["emotion"]
     score          = emotion_result["score"]
     crisis         = is_crisis(user_text)
 
-    # 2. Save user message
-    user_msg = Message(
-        session_id    = session_id,
-        sender        = "user",
-        content       = user_text,
-        emotion       = emotion,
-        emotion_score = score,
-        is_crisis     = int(crisis)
-    )
-    db.session.add(user_msg)
-    db.session.flush()
-
-    # 3. Generate bot reply
+    # 2. Generate bot reply
     if crisis:
         bot_text = get_crisis_response(language)
     else:
         bot_text = format_bot_message(emotion)
 
+    # 3. Save user message
+    user_msg = {
+        "_id":           str(uuid.uuid4()),
+        "session_id":    session_id,
+        "sender":        "user",
+        "content":       user_text,
+        "emotion":       emotion,
+        "emotion_score": score,
+        "is_crisis":     crisis,
+        "created_at":    datetime.utcnow().isoformat()
+    }
+    db.messages.insert_one(user_msg)
+
     # 4. Save bot message
-    bot_msg = Message(
-        session_id = session_id,
-        sender     = "bot",
-        content    = bot_text,
-        is_crisis  = int(crisis)
-    )
-    db.session.add(bot_msg)
-    db.session.commit()
+    bot_msg = {
+        "_id":        str(uuid.uuid4()),
+        "session_id": session_id,
+        "sender":     "bot",
+        "content":    bot_text,
+        "is_crisis":  crisis,
+        "created_at": datetime.utcnow().isoformat()
+    }
+    db.messages.insert_one(bot_msg)
 
     return {
-        "user_message": user_msg.to_dict(),
-        "bot_message":  bot_msg.to_dict(),
+        "user_message": {**user_msg, "_id": user_msg["_id"]},
+        "bot_message":  {**bot_msg,  "_id": bot_msg["_id"]},
         "emotion":      emotion,
         "score":        score,
         "is_crisis":    crisis
@@ -60,36 +65,44 @@ def handle_message(session_id: str, user_text: str, language: str = "en") -> dic
 
 def get_chat_history(session_id: str, limit: int = 50) -> list:
     """Fetch last N messages for a session."""
-    messages = (
-        Message.query
-        .filter_by(session_id=session_id)
-        .order_by(Message.created_at.asc())
+    db       = get_db()
+    messages = list(
+        db.messages
+        .find({"session_id": session_id})
+        .sort("created_at", 1)
         .limit(limit)
-        .all()
     )
-    return [m.to_dict() for m in messages]
+    for msg in messages:
+        msg["_id"] = str(msg["_id"])
+    return messages
 
 
 def log_mood_summary(session_id: str):
     """Summarise the session's emotions and save to mood_logs."""
-    messages = Message.query.filter_by(session_id=session_id, sender="user").all()
+    db       = get_db()
+    messages = list(db.messages.find({
+        "session_id": session_id,
+        "sender":     "user"
+    }))
+
     if not messages:
         return
 
     counts = {}
     for msg in messages:
-        if msg.emotion:
-            counts[msg.emotion] = counts.get(msg.emotion, 0) + 1
+        emotion = msg.get("emotion")
+        if emotion:
+            counts[emotion] = counts.get(emotion, 0) + 1
 
     if not counts:
         return
 
     dominant = max(counts, key=counts.get)
-    log = MoodLog(
-        session_id       = session_id,
-        dominant_emotion = dominant,
-        emotion_counts   = json.dumps(counts),
-        message_count    = len(messages)
-    )
-    db.session.add(log)
-    db.session.commit()
+    db.mood_logs.insert_one({
+        "_id":             str(uuid.uuid4()),
+        "session_id":      session_id,
+        "dominant_emotion": dominant,
+        "emotion_counts":  counts,
+        "message_count":   len(messages),
+        "logged_at":       datetime.utcnow().isoformat()
+    })
