@@ -12,13 +12,11 @@ jwt      = JWTManager()
 def create_app(env: str = "default") -> Flask:
     app = Flask(__name__)
 
-    # Load Config
     app.config.from_object(config[env])
 
-    # Extensions
     mongo.init_app(app)
     jwt.init_app(app)
-    CORS(app, origins=app.config["CORS_ORIGINS"])
+    CORS(app, origins="*", supports_credentials=True)
     socketio.init_app(app,
         cors_allowed_origins="*",
         async_mode="eventlet",
@@ -26,7 +24,6 @@ def create_app(env: str = "default") -> Flask:
         engineio_logger=False
     )
 
-    # Register Blueprints
     from routes.chat    import chat_bp
     from routes.mood    import mood_bp
     from routes.report  import report_bp
@@ -39,24 +36,20 @@ def create_app(env: str = "default") -> Flask:
     app.register_blueprint(call_bp)
     app.register_blueprint(auth_bp)
 
-    # Register Socket Events
     from socket_events.call_events      import register_call_events
     from socket_events.volunteer_events import register_volunteer_events
 
     register_call_events(socketio)
     register_volunteer_events(socketio)
 
-    # Health Check
     @app.route("/api/health")
     def health():
         return jsonify({"status": "ok", "app": "MindEase"}), 200
 
-    # 404 Handler
     @app.errorhandler(404)
     def not_found(e):
         return jsonify({"error": "Endpoint not found"}), 404
 
-    # 500 Handler
     @app.errorhandler(500)
     def server_error(e):
         return jsonify({"error": "Internal server error"}), 500
