@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 function Login() {
   const navigate = useNavigate();
@@ -7,26 +8,40 @@ function Login() {
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    navigate('/dashboard');
+    setLoading(true);
+    setError('');
+    try {
+      const res = await axios.post('http://localhost:5000/api/auth/login', {
+        email,
+        password,
+        remember_me: rememberMe
+      });
+      localStorage.setItem('token', res.data.token);
+      localStorage.setItem('user', JSON.stringify(res.data.user));
+      navigate('/dashboard');
+    } catch (err) {
+      setError(err.response?.data?.error || 'Login failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-background text-on-background">
       {/* ── Left Image Panel ────────────────────────────────── */}
       <div className="hidden lg:flex lg:w-[52%] relative overflow-hidden">
-        {/* Full-bleed image */}
         <img
           src="/login-side.png"
           alt="Serene wellness scene"
           className="absolute inset-0 w-full h-full object-cover"
         />
-        {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-black/10" />
 
-        {/* Brand logo (top-left) */}
         <Link to="/" className="absolute top-8 left-8 z-10 flex items-center gap-2.5 group">
           <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shadow-md group-hover:scale-105 transition-transform duration-200">
             <span className="material-symbols-outlined text-white text-lg fill-icon">spa</span>
@@ -34,7 +49,6 @@ function Login() {
           <span className="text-[22px] font-bold text-white tracking-tight drop-shadow-lg">MindEase</span>
         </Link>
 
-        {/* Bottom tagline */}
         <div className="absolute bottom-10 left-8 right-8 z-10 space-y-2">
           <h2 className="text-3xl xl:text-[38px] leading-[1.15] font-bold text-white tracking-tight drop-shadow-lg">
             Take a deep breath.<br />
@@ -48,7 +62,6 @@ function Login() {
 
       {/* ── Right Form Panel ────────────────────────────────── */}
       <div className="flex-1 flex flex-col justify-center items-center min-h-screen bg-surface-container-lowest px-6 py-12 sm:px-10 md:px-16 relative overflow-hidden">
-        {/* Top nav (mobile only brand + desktop back link) */}
         <div className="absolute top-6 left-6 right-6 flex justify-between items-center">
           <Link to="/" className="lg:hidden font-bold text-xl text-primary tracking-tight">MindEase</Link>
           <Link to="/" className="hidden lg:flex items-center gap-1.5 text-sm text-on-surface-variant hover:text-primary transition-colors group">
@@ -60,15 +73,12 @@ function Login() {
           </Link>
         </div>
 
-        {/* Form card */}
         <div className="w-full max-w-[420px] space-y-7 animate-slide-up">
-          {/* Header */}
           <div className="space-y-2">
             <h1 className="text-3xl font-bold text-on-surface tracking-tight">Welcome back 👋</h1>
             <p className="text-on-surface-variant text-sm">Enter your credentials to access your dashboard.</p>
           </div>
 
-          {/* Social sign-in */}
           <div className="grid grid-cols-2 gap-3">
             <button
               type="button"
@@ -93,7 +103,6 @@ function Login() {
             </button>
           </div>
 
-          {/* Divider */}
           <div className="relative flex items-center justify-center">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-outline-variant/40" />
@@ -103,9 +112,13 @@ function Login() {
             </span>
           </div>
 
-          {/* Form */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-600 text-sm rounded-xl px-4 py-3">
+              {error}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Email */}
             <div className="space-y-1.5">
               <label htmlFor="email" className="block text-sm font-semibold text-on-surface">
                 Email Address
@@ -124,7 +137,6 @@ function Login() {
               </div>
             </div>
 
-            {/* Password */}
             <div className="space-y-1.5">
               <div className="flex justify-between items-center">
                 <label htmlFor="password" className="block text-sm font-semibold text-on-surface">
@@ -158,7 +170,6 @@ function Login() {
               </div>
             </div>
 
-            {/* Remember Me */}
             <div className="flex items-center gap-2.5 pt-1">
               <input
                 id="remember"
@@ -172,17 +183,22 @@ function Login() {
               </label>
             </div>
 
-            {/* Submit */}
             <button
               type="submit"
-              className="w-full bg-primary text-white py-3.5 rounded-xl text-sm font-semibold hover:bg-primary/90 active:scale-98 transition-all duration-150 shadow-lg shadow-primary/20 mt-2 flex items-center justify-center gap-2"
+              disabled={loading}
+              className="w-full bg-primary text-white py-3.5 rounded-xl text-sm font-semibold hover:bg-primary/90 active:scale-98 transition-all duration-150 shadow-lg shadow-primary/20 mt-2 flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              <span>Sign In</span>
-              <span className="material-symbols-outlined text-base">arrow_forward</span>
+              {loading ? (
+                <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <>
+                  <span>Sign In</span>
+                  <span className="material-symbols-outlined text-base">arrow_forward</span>
+                </>
+              )}
             </button>
           </form>
 
-          {/* Switch to signup */}
           <p className="text-center text-sm text-on-surface-variant">
             Don't have an account?{' '}
             <Link to="/signup" className="text-primary font-semibold hover:underline">
