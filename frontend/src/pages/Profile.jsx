@@ -27,18 +27,19 @@ function Profile() {
   const avatarInputRef = useRef(null);
   const docInputRef = useRef(null);
 
-  // Profile Avatar state with localStorage persistence
+  // Get logged in user from localStorage
+  const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+
   const [avatarUrl, setAvatarUrl] = useState(() => {
     return localStorage.getItem('mindease_user_avatar') || DEFAULT_AVATAR;
   });
 
-  const [userName, setUserName] = useState(() => localStorage.getItem('mindease_user_name') || 'Eleanor Vance');
+  const [userName, setUserName] = useState(() => storedUser.full_name || localStorage.getItem('mindease_user_name') || 'User');
+  const [userEmail] = useState(storedUser.email || '');
   const [userBio, setUserBio] = useState('Maintaining a 12-day mindfulness streak. "One day at a time, finding peace in the present."');
   const [userLocation] = useState('Seattle, WA');
   const [dailyReminders, setDailyReminders] = useState(true);
 
-
-  // Uploaded documents state
   const [documents, setDocuments] = useState([
     { id: 'doc-1', name: 'Mindfulness_Journal_July.pdf', size: '1.2 MB', date: 'July 15, 2026' },
     { id: 'doc-2', name: 'Therapy_Session_Notes.docx', size: '450 KB', date: 'June 28, 2026' },
@@ -51,16 +52,13 @@ function Profile() {
     setTimeout(() => setToastMsg(null), 3000);
   };
 
-  // Avatar Upload Handler
   const handleAvatarSelect = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     if (!file.type.startsWith('image/')) {
       showToast('Please select a valid image file (PNG, JPG, WEBP).');
       return;
     }
-
     const reader = new FileReader();
     reader.onload = (event) => {
       const result = event.target?.result;
@@ -74,18 +72,15 @@ function Profile() {
     e.target.value = '';
   };
 
-  // Document Upload Handler
   const handleDocumentSelect = (e) => {
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
-
     const newDocs = files.map((file) => ({
       id: `doc_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
       name: file.name,
       size: `${(file.size / 1024 / 1024).toFixed(2)} MB`,
       date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
     }));
-
     setDocuments((prev) => [...newDocs, ...prev]);
     showToast(`Uploaded ${files.length} document${files.length > 1 ? 's' : ''}!`);
     e.target.value = '';
@@ -94,6 +89,13 @@ function Profile() {
   const removeDocument = (id) => {
     setDocuments((prev) => prev.filter((d) => d.id !== id));
     showToast('Document removed.');
+  };
+
+  const handleSignOut = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('mindease_user_avatar');
+    window.location.href = '/login';
   };
 
   return (
@@ -115,13 +117,13 @@ function Profile() {
         </div>
 
         <div className="flex items-center gap-3">
-          <Link
-            to="/login"
+          <button
+            onClick={handleSignOut}
             className="bg-surface-container-high text-error px-4 py-2 rounded-full font-label-md text-label-md hover:bg-error-container hover:text-on-error-container transition-colors flex items-center gap-2 text-xs font-bold"
           >
             <span className="material-symbols-outlined text-base">logout</span>
             <span className="hidden sm:inline">Sign Out</span>
-          </Link>
+          </button>
         </div>
       </header>
 
@@ -135,7 +137,6 @@ function Profile() {
 
       {/* Scrollable Page Content */}
       <div className="flex-1 overflow-y-auto custom-scrollbar relative">
-        {/* Top Atmospheric Gradient Effect */}
         <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-primary-fixed/30 to-transparent -z-10" />
 
         <main className="p-margin-mobile md:p-margin-desktop max-w-[1000px] mx-auto space-y-10 py-10">
@@ -162,6 +163,9 @@ function Profile() {
 
             <div className="text-center md:text-left space-y-2 w-full">
               <h2 className="font-headline-lg text-[30px] font-bold text-on-surface">{userName}</h2>
+              {userEmail && (
+                <p className="text-xs text-on-surface-variant font-medium">{userEmail}</p>
+              )}
               <p className="font-body-md text-on-surface-variant max-w-full text-sm">{userBio}</p>
               <div className="flex flex-wrap gap-2 pt-2 justify-center md:justify-start">
                 <span className="px-3 py-1 bg-secondary-container text-on-secondary-container text-xs font-bold rounded-full">
@@ -191,7 +195,6 @@ function Profile() {
                 <button className="text-primary font-label-md text-xs font-semibold hover:underline">View All</button>
               </div>
 
-              {/* Badges Grid */}
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                 {achievements.map((item) => (
                   <div
@@ -207,15 +210,13 @@ function Profile() {
                 ))}
               </div>
 
-              {/* Mood Trends Graph */}
               <div className="mt-4 pt-6 border-t border-outline-variant/20">
                 <p className="font-label-md text-on-surface font-bold text-sm mb-4">Mood Trends (Last 7 Days)</p>
                 <div className="h-32 w-full flex items-end justify-between gap-2 px-2">
                   {moodBars.map((bar) => (
                     <div
                       key={bar.day}
-                      className={`w-full rounded-t-lg transition-all hover:bg-primary ${bar.active ? 'bg-primary shadow-lg shadow-primary/20' : 'bg-primary/20'
-                        }`}
+                      className={`w-full rounded-t-lg transition-all hover:bg-primary ${bar.active ? 'bg-primary shadow-lg shadow-primary/20' : 'bg-primary/20'}`}
                       style={{ height: bar.height }}
                     />
                   ))}
@@ -232,7 +233,6 @@ function Profile() {
 
             {/* Preferences & Security (1 col) */}
             <section className="space-y-6">
-              {/* Preferences Card */}
               <div className="bg-white/80 backdrop-blur-md p-6 rounded-[2rem] border border-white/50 shadow-sm space-y-4">
                 <h3 className="font-headline-sm text-base font-bold text-on-surface">Preferences</h3>
                 <div className="space-y-4">
@@ -243,12 +243,10 @@ function Profile() {
                     </div>
                     <button
                       onClick={() => setDailyReminders(!dailyReminders)}
-                      className={`relative inline-flex h-5 w-10 shrink-0 cursor-pointer rounded-full transition-colors ${dailyReminders ? 'bg-primary' : 'bg-outline-variant'
-                        }`}
+                      className={`relative inline-flex h-5 w-10 shrink-0 cursor-pointer rounded-full transition-colors ${dailyReminders ? 'bg-primary' : 'bg-outline-variant'}`}
                     >
                       <span
-                        className={`pointer-events-none inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow ring-0 transition-transform mt-0.5 ml-0.5 ${dailyReminders ? 'translate-x-5' : 'translate-x-0'
-                          }`}
+                        className={`pointer-events-none inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow ring-0 transition-transform mt-0.5 ml-0.5 ${dailyReminders ? 'translate-x-5' : 'translate-x-0'}`}
                       />
                     </button>
                   </div>
@@ -259,19 +257,16 @@ function Profile() {
                     </div>
                     <button
                       onClick={() => setDarkMode(!darkMode)}
-                      className={`relative inline-flex h-5 w-10 shrink-0 cursor-pointer rounded-full transition-colors ${darkMode ? 'bg-primary' : 'bg-outline-variant'
-                        }`}
+                      className={`relative inline-flex h-5 w-10 shrink-0 cursor-pointer rounded-full transition-colors ${darkMode ? 'bg-primary' : 'bg-outline-variant'}`}
                     >
                       <span
-                        className={`pointer-events-none inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow ring-0 transition-transform mt-0.5 ml-0.5 ${darkMode ? 'translate-x-5' : 'translate-x-0'
-                          }`}
+                        className={`pointer-events-none inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow ring-0 transition-transform mt-0.5 ml-0.5 ${darkMode ? 'translate-x-5' : 'translate-x-0'}`}
                       />
                     </button>
                   </div>
                 </div>
               </div>
 
-              {/* Privacy & Security Card */}
               <div className="bg-surface-container-highest/40 p-6 rounded-[2rem] border border-outline-variant/30 space-y-3">
                 <div className="flex items-center gap-2 text-on-surface">
                   <span className="material-symbols-outlined text-on-surface-variant text-lg">lock</span>
@@ -307,7 +302,6 @@ function Profile() {
               </button>
             </div>
 
-            {/* Document List */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {documents.map((doc) => (
                 <div
@@ -336,9 +330,9 @@ function Profile() {
           </section>
 
           {/* ── Quick Crisis Support CTA Section ────────────── */}
-          <section className="mt-10 text-center p-8 bg-surface-container  rounded-[2rem] border border-primary/10 space-y-4">
+          <section className="mt-10 text-center p-8 bg-surface-container rounded-[2rem] border border-primary/10 space-y-4">
             <h3 className="font-headline-md text-xl font-bold text-on-surface">Need to talk to someone right now?</h3>
-            <p className="text-xs text-on-surface-variant max-w-full  mx-auto leading-relaxed">
+            <p className="text-xs text-on-surface-variant max-w-full mx-auto leading-relaxed">
               Our crisis team is available 24/7. Don't hesitate to reach out if you're feeling overwhelmed.
             </p>
             <div className="flex flex-wrap justify-center gap-4 pt-2">
