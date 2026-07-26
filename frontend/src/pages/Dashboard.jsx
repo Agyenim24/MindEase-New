@@ -5,6 +5,10 @@ import { useLayout } from '../components/Layout';
 function Dashboard() {
   const { toggleMobileMenu } = useLayout();
 
+  const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+  const userName = storedUser.full_name || 'User';
+  const userAvatar = storedUser.avatar_url || 'https://lh3.googleusercontent.com/aida-public/AB6AXuDMsJX5eOyLvBZcY2elDf4K3j15qL1kMbx4AyIOtwWZkr1F7WWWp2v5pzxXd-pgl9sq2VfA01TKRsPFiB0dXhGRFIbK7PSvnrfPdbB1D8iahAyuIj45GTmlfS3SJn4jI1FMYHhgmVzdsmeSyMmzdSmMibSsrFcld00Vco6aUFs_-xBlBFoRZ5ZZiyZNtDDQlfN-OT0Soo-AEcdGNxCPkSaAvLWhprFCgSXsR5zKzNkc8mkWB5SC2G-0aKQyHyqvx0jCWAtHM5Em2SXw';
+
   return (
     <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
       {/* Header / Top Bar */}
@@ -14,7 +18,7 @@ function Dashboard() {
             <span className="material-symbols-outlined">menu</span>
           </button>
           <div>
-            <h2 className="font-headline-md text-headline-md font-bold text-on-surface">Welcome back, Sarah</h2>
+            <h2 className="font-headline-md text-headline-md font-bold text-on-surface">Welcome back, {userName}</h2>
             <p className="font-label-md text-label-md text-on-surface-variant">Feeling calm today?</p>
           </div>
         </div>
@@ -23,7 +27,7 @@ function Dashboard() {
             <span className="material-symbols-outlined">notifications</span>
           </button>
           <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-primary/20">
-            <img alt="Sarah Profile" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDMsJX5eOyLvBZcY2elDf4K3j15qL1kMbx4AyIOtwWZkr1F7WWWp2v5pzxXd-pgl9sq2VfA01TKRsPFiB0dXhGRFIbK7PSvnrfPdbB1D8iahAyuIj45GTmlfS3SJn4jI1FMYHhgmVzdsmeSyMmzdSmMibSsrFcld00Vco6aUFs_-xBlBFoRZ5ZZiyZNtDDQlfN-OT0Soo-AEcdGNxCPkSaAvLWhprFCgSXsR5zKzNkc8mkWB5SC2G-0aKQyHyqvx0jCWAtHM5Em2SXw" />
+            <img alt={userName} className="w-full h-full object-cover" src={userAvatar} />
           </div>
         </div>
       </header>
@@ -161,7 +165,7 @@ function Dashboard() {
                 </button>
               </div>
               <div className="rounded-3xl overflow-hidden aspect-video shadow-2xl relative">
-                <img className="w-full h-full object-cover" data-alt="A serene landscape photo showing a calm lake at dawn with misty mountains in the background, reflecting a soft blue and lavender sky. The lighting is high-key and ethereal, evoking a sense of profound tranquility and professional mindfulness. The composition is minimal and balanced, perfectly aligning with a modern wellness application aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuALa-ydEYnZs0JrF1Sp9-UPPWttLG_MVhoe_xuOeedhiODktRg_-CffinPyZyaaCFE_0m9F0xVbgoMfzJRpYKsInZMhJ4W6mLkOW8xS3p4_E5DPCmKfoGJ0_u5WkNJGVybCMmZx71ZP4UmbwoAR7FhPJakRZ9M__X1K06RT08F7ZPUIREB-hmD2rHnJlJtLTnM5W46XOStnSjbAn30BrHkdTRIQjvpk7jhxgdaUoC3nEG24TpyuMvMI0D_mclD5h7gYHTLBFzM7-UvT" alt="Serene landscape" />
+                <img className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuALa-ydEYnZs0JrF1Sp9-UPPWttLG_MVhoe_xuOeedhiODktRg_-CffinPyZyaaCFE_0m9F0xVbgoMfzJRpYKsInZMhJ4W6mLkOW8xS3p4_E5DPCmKfoGJ0_u5WkNJGVybCMmZx71ZP4UmbwoAR7FhPJakRZ9M__X1K06RT08F7ZPUIREB-hmD2rHnJlJtLTnM5W46XOStnSjbAn30BrHkdTRIQjvpk7jhxgdaUoC3nEG24TpyuMvMI0D_mclD5h7gYHTLBFzM7-UvT" alt="Serene landscape" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
                 <div className="absolute bottom-6 left-6 text-white italic font-body-md text-body-md max-w-full">
                   "Peace begins with a smile." — Mother Teresa
