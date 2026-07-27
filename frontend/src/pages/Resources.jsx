@@ -1,79 +1,29 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLayout } from '../components/Layout';
+import { useData } from '../context/DataContext';
 
 const categories = ['All Resources', 'Anxiety', 'Stress', 'Sleep', 'CBT', 'Mindfulness'];
 
-const featuredWisdom = {
-  main: {
-    category: 'MINDSET',
-    title: 'Mastering the Art of Emotional Regulation',
-    desc: 'Learn practical cognitive behavioral techniques to navigate complex emotions with grace and resilience.',
-    readTime: '12 min read',
-    bgUrl: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&w=1200&q=80',
-  },
-  side: [
-    {
-      category: 'CBT Basics',
-      title: 'Reframing Negative Thought Patterns',
-      readTime: '8 min read',
-    },
-    {
-      category: 'Sleep Science',
-      title: 'The Circadian Rhythm Reset Guide',
-      readTime: '15 min read',
-    },
-  ],
-};
-
-const videoSessions = [
-  {
-    title: 'Morning Grounding Practice',
-    guide: 'Guided by Dr. Aris Thorne',
-    duration: '15:00',
-    thumbnail: 'https://images.unsplash.com/photo-1545205597-3d9d02c29597?auto=format&fit=crop&w=600&q=80',
-  },
-  {
-    title: 'Deep Sleep Soundscapes',
-    guide: 'Ambient Therapy Series',
-    duration: '22:45',
-    thumbnail: 'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&w=600&q=80',
-  },
-  {
-    title: 'Coping with Social Anxiety',
-    guide: 'Expert Series with Sarah Jenkins',
-    duration: '08:12',
-    thumbnail: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=600&q=80',
-  },
-];
-
-const dailyReads = [
-  {
-    tag: 'Habits',
-    title: 'Micro-habits for a clearer mind',
-    meta: '3 min read • Updated today',
-    img: 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=300&q=80',
-  },
-  {
-    tag: 'Stress',
-    title: 'The 4-7-8 Technique Explained',
-    meta: '5 min read • Popular this week',
-    img: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=300&q=80',
-  },
-  {
-    tag: 'Reflection',
-    title: 'Journaling prompts for anxious evenings',
-    meta: '4 min read • Recommended',
-    img: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=300&q=80',
-  },
-];
-
-const trendingTopics = ['#BurnoutRecovery', '#MindfulEating', '#SocialAnxiety', '#BoxBreathing'];
-
 function Resources() {
   const { toggleMobileMenu } = useLayout();
+  const { resources, videoSessions, toggleBookmarkResource, profile } = useData();
   const [activeCategory, setActiveCategory] = useState('All Resources');
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Filter resources dynamically based on category & search query
+  const filteredResources = resources.filter((res) => {
+    const matchesCategory = activeCategory === 'All Resources' || res.category.toLowerCase() === activeCategory.toLowerCase();
+    const matchesSearch = searchQuery === '' ||
+      res.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      res.desc.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      res.category.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
+
+  const featured = filteredResources[0] || resources[0];
+  const sideArticles = filteredResources.slice(1, 3);
+  const remainingArticles = filteredResources.slice(3);
 
   return (
     <div className="flex-1 flex flex-col min-h-0 overflow-hidden bg-background">
@@ -113,7 +63,7 @@ function Resources() {
       <div className="flex-1 overflow-y-auto custom-scrollbar">
         <main className="px-margin-mobile md:px-margin-desktop py-8 max-w-[1440px] mx-auto space-y-12">
 
-          {/* ── Search & Header ───────────────────────────────── */}
+          {/* Search & Header */}
           <section>
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
               <div>
@@ -142,10 +92,11 @@ function Resources() {
                 <button
                   key={cat}
                   onClick={() => setActiveCategory(cat)}
-                  className={`px-6 py-2 rounded-full font-label-md whitespace-nowrap transition-colors ${activeCategory === cat
+                  className={`px-6 py-2 rounded-full font-label-md whitespace-nowrap transition-colors ${
+                    activeCategory === cat
                       ? 'bg-primary text-on-primary shadow-sm'
                       : 'bg-surface-container hover:bg-surface-container-high text-on-surface-variant'
-                    }`}
+                  }`}
                 >
                   {cat}
                 </button>
@@ -153,74 +104,92 @@ function Resources() {
             </div>
           </section>
 
-          {/* ── Featured Wisdom (Bento Grid) ──────────────────── */}
-          <section>
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="font-headline-md text-headline-md text-on-surface font-bold">Featured Wisdom</h3>
-              <button className="text-primary font-label-md hover:underline text-sm font-semibold">View All</button>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Large Featured Card (2 cols) */}
-              <div className="md:col-span-2 group relative h-[380px] rounded-3xl overflow-hidden cursor-pointer shadow-sm hover:shadow-lg transition-all">
-                <div
-                  className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
-                  style={{ backgroundImage: `url(${featuredWisdom.main.bgUrl})` }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
-                <div className="absolute bottom-0 left-0 p-8 text-white">
-                  <span className="inline-block px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container text-xs font-bold mb-4">
-                    {featuredWisdom.main.category}
-                  </span>
-                  <h4 className="font-headline-lg text-2xl md:text-3xl font-bold mb-2">{featuredWisdom.main.title}</h4>
-                  <p className="text-white/80 line-clamp-2 mb-4 text-sm">{featuredWisdom.main.desc}</p>
-                  <div className="flex items-center gap-2 text-xs opacity-90">
-                    <span className="material-symbols-outlined text-sm">schedule</span>
-                    <span>{featuredWisdom.main.readTime}</span>
+          {/* Featured Wisdom (Dynamic Bento Grid) */}
+          {featured && (
+            <section>
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="font-headline-md text-headline-md text-on-surface font-bold">Featured Wisdom</h3>
+                <span className="text-xs text-on-surface-variant font-medium">
+                  Showing {filteredResources.length} items
+                </span>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Main Featured Card */}
+                <div className="md:col-span-2 group relative h-[380px] rounded-3xl overflow-hidden cursor-pointer shadow-sm hover:shadow-lg transition-all">
+                  <div
+                    className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+                    style={{ backgroundImage: `url(${featured.bgUrl})` }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleBookmarkResource(featured.id);
+                    }}
+                    className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/40 backdrop-blur text-white flex items-center justify-center hover:bg-black/60 transition"
+                  >
+                    <span className="material-symbols-outlined text-lg" style={{ fontVariationSettings: profile.savedResourceIds.includes(featured.id) ? "'FILL' 1" : "'FILL' 0" }}>
+                      bookmark
+                    </span>
+                  </button>
+                  <div className="absolute bottom-0 left-0 p-8 text-white">
+                    <span className="inline-block px-3 py-1 rounded-full bg-primary text-on-primary text-xs font-bold mb-4">
+                      {featured.category}
+                    </span>
+                    <h4 className="font-headline-lg text-2xl md:text-3xl font-bold mb-2">{featured.title}</h4>
+                    <p className="text-white/80 line-clamp-2 mb-4 text-sm">{featured.desc}</p>
+                    <div className="flex items-center gap-2 text-xs opacity-90">
+                      <span className="material-symbols-outlined text-sm">schedule</span>
+                      <span>{featured.readTime}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Side Cards (1 col) */}
-              <div className="flex flex-col gap-6">
-                {featuredWisdom.side.map((card) => (
-                  <div
-                    key={card.title}
-                    className="group h-[178px] rounded-3xl bg-white border border-outline-variant/30 p-6 flex flex-col justify-between cursor-pointer hover:border-primary/40 hover:shadow-md transition-all"
-                  >
-                    <div>
-                      <span className="text-secondary font-label-sm uppercase tracking-wider text-xs font-bold">{card.category}</span>
-                      <h5 className="font-headline-md text-base font-bold mt-1.5 group-hover:text-primary transition-colors text-on-surface">
-                        {card.title}
-                      </h5>
+                {/* Side Articles Cards */}
+                <div className="flex flex-col gap-6">
+                  {sideArticles.map((card) => (
+                    <div
+                      key={card.id}
+                      className="group h-[178px] rounded-3xl bg-surface-container-lowest border border-outline-variant/30 p-6 flex flex-col justify-between cursor-pointer hover:border-primary/40 hover:shadow-md transition-all relative"
+                    >
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleBookmarkResource(card.id);
+                        }}
+                        className="absolute top-4 right-4 text-on-surface-variant hover:text-primary transition"
+                      >
+                        <span className="material-symbols-outlined text-lg" style={{ fontVariationSettings: profile.savedResourceIds.includes(card.id) ? "'FILL' 1" : "'FILL' 0" }}>
+                          bookmark
+                        </span>
+                      </button>
+                      <div>
+                        <span className="text-primary font-label-sm uppercase tracking-wider text-xs font-bold">{card.category}</span>
+                        <h5 className="font-headline-md text-base font-bold mt-1.5 group-hover:text-primary transition-colors text-on-surface line-clamp-2 pr-6">
+                          {card.title}
+                        </h5>
+                      </div>
+                      <div className="flex items-center justify-between pt-2">
+                        <span className="text-xs text-on-surface-variant font-medium">{card.readTime}</span>
+                        <span className="material-symbols-outlined text-primary group-hover:translate-x-1 transition-transform text-lg">arrow_forward</span>
+                      </div>
                     </div>
-                    <div className="flex items-center justify-between pt-2">
-                      <span className="text-xs text-on-surface-variant font-medium">{card.readTime}</span>
-                      <span className="material-symbols-outlined text-primary group-hover:translate-x-1 transition-transform text-lg">arrow_forward</span>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
-          </section>
+            </section>
+          )}
 
-          {/* ── Video Guided Sessions Carousel ────────────────── */}
+          {/* Dynamic Video Guided Sessions */}
           <section className="bg-surface-container-low -mx-margin-mobile md:-mx-margin-desktop px-margin-mobile md:px-margin-desktop py-12">
             <div className="max-w-[1440px] mx-auto">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="font-headline-md text-headline-md text-on-surface font-bold">Video Guided Sessions</h3>
-                <div className="flex gap-2">
-                  <button className="w-10 h-10 rounded-full border border-outline-variant flex items-center justify-center hover:bg-white transition-colors text-on-surface-variant">
-                    <span className="material-symbols-outlined text-lg">chevron_left</span>
-                  </button>
-                  <button className="w-10 h-10 rounded-full border border-outline-variant flex items-center justify-center hover:bg-white transition-colors text-on-surface-variant">
-                    <span className="material-symbols-outlined text-lg">chevron_right</span>
-                  </button>
-                </div>
               </div>
 
               <div className="flex gap-6 overflow-x-auto hide-scrollbar pb-2">
                 {videoSessions.map((vid) => (
-                  <div key={vid.title} className="min-w-[280px] md:min-w-[340px] flex-shrink-0 group cursor-pointer">
+                  <div key={vid.id} className="min-w-[280px] md:min-w-[340px] flex-shrink-0 group cursor-pointer">
                     <div className="relative aspect-video rounded-2xl overflow-hidden mb-3 shadow-sm">
                       <img src={vid.thumbnail} alt={vid.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                       <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-all flex items-center justify-center">
@@ -238,60 +207,39 @@ function Resources() {
             </div>
           </section>
 
-          {/* ── Daily Reads & Sidebar Grid ────────────────────── */}
-          <section className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-            {/* Daily Reads List */}
-            <div className="lg:col-span-2 space-y-6">
-              <h3 className="font-headline-md text-headline-md text-on-surface font-bold">Daily Reads</h3>
-              <div className="space-y-4">
-                {dailyReads.map((item) => (
-                  <div
-                    key={item.title}
-                    className="flex items-center gap-4 p-4 rounded-2xl bg-white border border-outline-variant/20 shadow-sm hover:shadow-md transition-all cursor-pointer group"
-                  >
-                    <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0">
-                      <img src={item.img} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+          {/* Daily Reads List */}
+          {remainingArticles.length > 0 && (
+            <section className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+              <div className="lg:col-span-2 space-y-6">
+                <h3 className="font-headline-md text-headline-md text-on-surface font-bold">More Articles</h3>
+                <div className="space-y-4">
+                  {remainingArticles.map((item) => (
+                    <div
+                      key={item.id}
+                      className="flex items-center gap-4 p-4 rounded-2xl bg-surface-container-lowest border border-outline-variant/20 shadow-sm hover:shadow-md transition-all cursor-pointer group"
+                    >
+                      <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0">
+                        <img src={item.bgUrl} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                      </div>
+                      <div className="flex-grow space-y-1">
+                        <p className="text-primary font-bold text-xs">{item.category}</p>
+                        <h4 className="font-bold text-on-surface text-sm group-hover:text-primary transition-colors">{item.title}</h4>
+                        <p className="text-xs text-on-surface-variant">{item.readTime}</p>
+                      </div>
+                      <button
+                        onClick={() => toggleBookmarkResource(item.id)}
+                        className="p-2 text-on-surface-variant hover:text-primary transition"
+                      >
+                        <span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: profile.savedResourceIds.includes(item.id) ? "'FILL' 1" : "'FILL' 0" }}>
+                          bookmark
+                        </span>
+                      </button>
                     </div>
-                    <div className="flex-grow space-y-1">
-                      <p className="text-primary font-bold text-xs">{item.tag}</p>
-                      <h4 className="font-bold text-on-surface text-sm group-hover:text-primary transition-colors">{item.title}</h4>
-                      <p className="text-xs text-on-surface-variant">{item.meta}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Trending & CTA Cards */}
-            <div className="space-y-6">
-              {/* AI Chat CTA Card */}
-              <div className="p-8 rounded-3xl bg-primary text-on-primary relative overflow-hidden shadow-lg">
-                <div className="relative z-10 space-y-3">
-                  <h4 className="font-headline-md text-xl font-bold">Feeling overwhelmed?</h4>
-                  <p className="text-xs opacity-90 leading-relaxed">Our AI companion is here to help you navigate your current emotions in real-time.</p>
-                  <Link
-                    to="/chat"
-                    className="inline-block bg-white text-primary px-6 py-2.5 rounded-full text-xs font-semibold shadow-sm hover:bg-surface-bright transition-colors"
-                  >
-                    Start Chatting
-                  </Link>
-                </div>
-                <span className="material-symbols-outlined absolute -bottom-4 -right-4 text-9xl opacity-10 text-white select-none">forum</span>
-              </div>
-
-              {/* Trending Topics Box */}
-              <div className="p-6 rounded-3xl border border-outline-variant/30 bg-white shadow-sm space-y-3">
-                <h4 className="font-bold text-on-surface text-sm">Trending Topics</h4>
-                <div className="flex flex-wrap gap-2">
-                  {trendingTopics.map((tag) => (
-                    <span key={tag} className="px-3 py-1 bg-surface-container-high rounded-lg text-xs font-medium text-on-surface cursor-pointer hover:bg-primary/10 hover:text-primary transition-colors">
-                      {tag}
-                    </span>
                   ))}
                 </div>
               </div>
-            </div>
-          </section>
+            </section>
+          )}
 
         </main>
       </div>

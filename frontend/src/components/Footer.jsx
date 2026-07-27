@@ -6,14 +6,14 @@ const Footer = () => {
   return (
     <footer className="bg-surface-container-low border-t border-outline-variant/20 mt-20 transition-colors">
       {/* Top Section */}
-      <div className="max-w-7xl mx-auto px-8 py-10 grid grid-cols-1 md:grid-cols-3 gap-16">
+      <div className="max-w-7xl mx-auto px-8 py-5 grid grid-cols-1 md:grid-cols-3 gap-16">
         {/* Left */}
         <div>
-          <h2 className="text-2xl font-bold text-on-surface mb-6">
+          <h2 className="text-2xl font-bold text-on-surface mb-5">
             MindEase
           </h2>
 
-          <p className="text-on-surface-variant leading-8 text-lg w-full">
+          <p className="text-on-surface-variant leading-8 text-sd w-full">
             Professional care for a modern world. Empowering your
             mental health journey with technology and empathy.
           </p>
@@ -28,7 +28,7 @@ const Footer = () => {
         <div className="md:col-span-2 flex flex-col sm:flex-row justify-end gap-20">
           {/* Company */}
           <div>
-            <h3 className="font-bold text-on-surface mb-6">
+            <h3 className="font-bold text-on-surface mb-5">
               Company
             </h3>
 
@@ -64,7 +64,7 @@ const Footer = () => {
 
           {/* Legal */}
           <div>
-            <h3 className="font-bold text-on-surface mb-6">
+            <h3 className="font-bold text-on-surface mb-5">
               Legal
             </h3>
 
@@ -111,7 +111,7 @@ const Footer = () => {
 
       {/* Bottom Bar */}
       <div className="border-t border-outline-variant/20">
-        <div className="max-w-7xl mx-auto px-8 py-6 flex flex-col md:flex-row justify-between items-center gap-6">
+        <div className="max-w-7xl mx-auto px-8 py-3 flex flex-col md:flex-row justify-between items-center gap-6">
           <p className="text-on-surface-variant text-base">
             © 2026 MindEase. Professional care for a modern world.
           </p>
@@ -135,4 +135,4 @@ const Footer = () => {
   );
 };
 
-export default Footer;
+export default Footer;

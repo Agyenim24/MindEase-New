@@ -17,9 +17,8 @@ function Sidebar() {
 
   return (
     <aside
-      className={`hidden md:flex flex-col fixed left-0 top-0 h-screen bg-surface-container-low border-r border-outline-variant/20 z-50 p-4 space-y-2 transition-all duration-300 ${
-        sidebarCollapsed ? 'w-20 items-center' : 'w-64'
-      }`}
+      className={`hidden md:flex flex-col fixed left-0 top-0 h-screen bg-surface-container-low border-r border-outline-variant/20 z-50 p-4 space-y-2 transition-all duration-300 ${sidebarCollapsed ? 'w-20 items-center' : 'w-64'
+        }`}
     >
       {/* Header with Title and Hide/Collapse Toggle Button */}
       <div className={`flex items-center justify-between w-full mb-4 ${sidebarCollapsed ? 'px-0 py-4 flex-col gap-3' : 'px-2 py-4'}`}>
@@ -57,12 +56,10 @@ function Sidebar() {
             end={item.path === '/'}
             title={sidebarCollapsed ? item.name : undefined}
             className={({ isActive }) =>
-              `rounded-xl flex items-center transition-all active:scale-[0.98] ${
-                sidebarCollapsed ? 'justify-center p-3' : 'gap-3 px-4 py-3'
-              } ${
-                isActive
-                  ? 'bg-primary-container text-on-primary-container font-semibold shadow-sm'
-                  : 'text-on-surface-variant hover:bg-surface-container-high'
+              `rounded-xl flex items-center transition-all active:scale-[0.98] ${sidebarCollapsed ? 'justify-center p-3' : 'gap-3 px-4 py-3'
+              } ${isActive
+                ? 'bg-primary-container text-on-primary-container font-semibold shadow-sm'
+                : 'text-on-surface-variant hover:bg-surface-container-high'
               }`
             }
           >
@@ -87,12 +84,10 @@ function Sidebar() {
           to="/emergency"
           title={sidebarCollapsed ? 'Emergency Support' : undefined}
           className={({ isActive }) =>
-            `w-full rounded-xl flex items-center transition-all font-semibold ${
-              sidebarCollapsed ? 'justify-center p-3' : 'gap-2.5 px-4 py-2.5'
-            } ${
-              isActive
-                ? 'bg-error text-white shadow-md shadow-error/20'
-                : 'text-error border border-error/20 hover:bg-error/10'
+            `w-full rounded-xl flex items-center transition-all font-semibold ${sidebarCollapsed ? 'justify-center p-3' : 'gap-2.5 px-4 py-2.5'
+            } ${isActive
+              ? 'bg-error text-white shadow-md shadow-error/20'
+              : 'text-error border border-error/20 hover:bg-error/10'
             }`
           }
         >
@@ -103,12 +98,10 @@ function Sidebar() {
           to="/settings"
           title={sidebarCollapsed ? 'Settings' : undefined}
           className={({ isActive }) =>
-            `w-full rounded-xl flex items-center transition-all ${
-              sidebarCollapsed ? 'justify-center p-3' : 'gap-3 px-4 py-2.5'
-            } ${
-              isActive
-                ? 'bg-primary-container text-on-primary-container font-semibold'
-                : 'text-on-surface-variant hover:bg-surface-container-high'
+            `w-full rounded-xl flex items-center transition-all ${sidebarCollapsed ? 'justify-center p-3' : 'gap-3 px-4 py-2.5'
+            } ${isActive
+              ? 'bg-primary-container text-on-primary-container font-semibold'
+              : 'text-on-surface-variant hover:bg-surface-container-high'
             }`
           }
         >
@@ -119,12 +112,10 @@ function Sidebar() {
           to="/help"
           title={sidebarCollapsed ? 'Help' : undefined}
           className={({ isActive }) =>
-            `w-full rounded-xl flex items-center transition-all ${
-              sidebarCollapsed ? 'justify-center p-3' : 'gap-3 px-4 py-2.5'
-            } ${
-              isActive
-                ? 'bg-primary-container text-on-primary-container font-semibold'
-                : 'text-on-surface-variant hover:bg-surface-container-high'
+            `w-full rounded-xl flex items-center transition-all ${sidebarCollapsed ? 'justify-center p-3' : 'gap-3 px-4 py-2.5'
+            } ${isActive
+              ? 'bg-primary-container text-on-primary-container font-semibold'
+              : 'text-on-surface-variant hover:bg-surface-container-high'
             }`
           }
         >

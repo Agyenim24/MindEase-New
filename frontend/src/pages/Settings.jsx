@@ -2,20 +2,21 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLayout } from '../components/Layout';
 import { useTheme } from '../context/ThemeContext';
+import { useData } from '../context/DataContext';
 
 function Settings() {
   const { toggleMobileMenu } = useLayout();
   const { darkMode, setDarkMode } = useTheme();
+  const { profile, updateProfile, settings, updateSettings, resetAllData } = useData();
 
-  // Profile state
-  const [fullName, setFullName] = useState('Elena Rodriguez');
-  const [email, setEmail] = useState('elena.rod@mindease.care');
+  const [fullName, setFullName] = useState(profile.name);
+  const [email, setEmail] = useState(profile.email);
 
-  // Notification state
-  const [dailyReminders, setDailyReminders] = useState(true);
-  const [clinicalUpdates, setClinicalUpdates] = useState(false);
+  const [emailNotifs, setEmailNotifs] = useState(settings.emailNotifications);
+  const [dailyReminders, setDailyReminders] = useState(settings.dailyCheckinReminder);
+  const [soundEffects, setSoundEffects] = useState(settings.soundEffects);
+  const [privacyLevel, setPrivacyLevel] = useState(settings.privacyLevel);
 
-  // Save/discard toast
   const [toastMsg, setToastMsg] = useState(null);
 
   const showToast = (msg) => {
@@ -24,17 +25,36 @@ function Settings() {
   };
 
   const handleSave = () => {
-    showToast('All changes saved successfully!');
+    updateProfile({ name: fullName, email });
+    updateSettings({
+      emailNotifications: emailNotifs,
+      dailyCheckinReminder: dailyReminders,
+      soundEffects,
+      privacyLevel
+    });
+    showToast('All settings saved successfully!');
   };
 
   const handleDiscard = () => {
-    setFullName('Elena Rodriguez');
-    setEmail('elena.rod@mindease.care');
-    setDailyReminders(true);
-    setClinicalUpdates(false);
+    setFullName(profile.name);
+    setEmail(profile.email);
+    setEmailNotifs(settings.emailNotifications);
+    setDailyReminders(settings.dailyCheckinReminder);
+    setSoundEffects(settings.soundEffects);
+    setPrivacyLevel(settings.privacyLevel);
     showToast('Changes discarded.');
   };
 
+  const handleExportData = () => {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ profile, settings }));
+    const downloadAnchor = document.createElement('a');
+    downloadAnchor.setAttribute("href", dataStr);
+    downloadAnchor.setAttribute("download", `mindease_export_${Date.now()}.json`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+    showToast('Data exported successfully!');
+  };
 
   return (
     <div className="flex-1 flex flex-col min-h-0 overflow-hidden bg-background">
@@ -57,189 +77,162 @@ function Settings() {
 
       {/* Main Content Area */}
       <div className="flex-1 overflow-y-auto custom-scrollbar">
-        <section className="p-margin-mobile md:p-margin-desktop max-w-[1000px] mx-auto w-full">
+        <section className="p-margin-mobile md:p-margin-desktop max-w-[1000px] mx-auto w-full py-8">
 
           {/* Page Header */}
-          <header className="mb-6 md:mb-12">
-            <h1 className="font-headline-xl text-[28px] sm:text-[32px] md:text-[40px] leading-[36px] md:leading-[48px] tracking-tight font-bold text-on-surface mb-2">
-              Settings
+          <header className="mb-6 md:mb-8">
+            <h1 className="font-headline-xl text-[28px] sm:text-[32px] md:text-[40px] font-bold text-on-surface mb-2">
+              Account Settings
             </h1>
-            <p className="text-on-surface-variant font-body-lg text-sm sm:text-body-lg">
-              Manage your MindEase experience and privacy.
+            <p className="text-on-surface-variant text-sm">
+              Manage your personal preferences, notifications, and privacy configuration.
             </p>
           </header>
 
           <div className="space-y-6">
 
-            {/* ── Profile Section ───────────────────────────────── */}
-            <div className="bg-white rounded-[2rem] p-5 sm:p-6 shadow-[0px_4px_20px_rgba(0,0,0,0.04)] border border-outline-variant/20">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="bg-secondary-container p-1 rounded-xl">
-                  <span className="material-symbols-outlined text-secondary text-[24px]">person</span>
+            {/* Profile Section */}
+            <div className="bg-surface-container-lowest rounded-[2rem] p-6 border border-outline-variant/20 shadow-sm space-y-6">
+              <div className="flex items-center gap-3">
+                <div className="bg-secondary-container p-2 rounded-xl text-secondary">
+                  <span className="material-symbols-outlined text-xl">person</span>
                 </div>
-                <h2 className="font-headline-md text-headline-md text-on-surface">Profile</h2>
+                <h2 className="font-headline-md text-lg font-bold text-on-surface">Account Information</h2>
               </div>
-              <div className="flex flex-col md:flex-row items-center md:items-center gap-6 md:gap-12 mb-6 text-center md:text-left">
-                {/* Avatar */}
-                <div className="relative group">
-                  <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-surface-container ring-1 ring-primary/10 bg-primary-fixed flex items-center justify-center">
-                    <span className="material-symbols-outlined text-primary text-4xl" style={{ fontVariationSettings: "'FILL' 1" }}>person</span>
-                  </div>
-                  <button className="absolute bottom-0 right-0 bg-primary text-white p-2 rounded-full shadow-lg border-2 border-white hover:scale-105 transition-transform">
-                    <span className="material-symbols-outlined text-[16px]">edit</span>
-                  </button>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-bold text-on-surface-variant block mb-1">Display Name</label>
+                  <input
+                    className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-3 text-sm text-on-surface font-semibold focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    type="text"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                  />
                 </div>
-                {/* Name & Email Fields */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 flex-1 w-full text-left">
-                  <div className="space-y-1">
-                    <label className="font-label-sm text-label-sm text-on-surface-variant block">Full Name</label>
-                    <input
-                      className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/20 text-on-surface font-body-md"
-                      type="text"
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="font-label-sm text-label-sm text-on-surface-variant block">Email Address</label>
-                    <input
-                      className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/20 text-on-surface font-body-md"
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                    />
-                  </div>
+                <div>
+                  <label className="text-xs font-bold text-on-surface-variant block mb-1">Email Address</label>
+                  <input
+                    className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-3 text-sm text-on-surface font-semibold focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
                 </div>
               </div>
             </div>
 
-            {/* ── Theme & Notifications (2-column) ─────────────── */}
+            {/* Theme & Notifications */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Appearance Card */}
-              <div className="bg-white rounded-[2rem] p-5 sm:p-6 shadow-[0px_4px_20px_rgba(0,0,0,0.04)] border border-outline-variant/20 flex flex-col justify-between">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-4">
-                    <div className="bg-primary-fixed p-1 rounded-xl">
-                      <span className="material-symbols-outlined text-primary text-[24px]">dark_mode</span>
-                    </div>
-                    <h3 className="font-headline-md text-headline-md text-on-surface">Appearance</h3>
+              {/* Appearance */}
+              <div className="bg-surface-container-lowest rounded-[2rem] p-6 border border-outline-variant/20 shadow-sm space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="bg-primary/10 p-2 rounded-xl text-primary">
+                    <span className="material-symbols-outlined text-xl">dark_mode</span>
                   </div>
+                  <h3 className="font-headline-md text-lg font-bold text-on-surface">Appearance</h3>
                 </div>
+
                 <div className="flex items-center justify-between p-4 bg-surface-container-low rounded-2xl border border-outline-variant/20">
                   <div>
-                    <p className="font-label-md text-label-md text-on-surface">Dark Mode</p>
-                    <p className="text-label-sm text-on-surface-variant">Switch to a darker interface</p>
+                    <p className="font-bold text-sm text-on-surface">Dark Mode</p>
+                    <p className="text-xs text-on-surface-variant">Switch to a dark color palette</p>
                   </div>
                   <button
                     onClick={() => setDarkMode(!darkMode)}
-                    className={`relative inline-flex h-6 w-12 shrink-0 cursor-pointer rounded-full transition-colors duration-300 ${
-                      darkMode ? 'bg-primary' : 'bg-outline-variant'
-                    }`}
+                    className={`relative inline-flex h-6 w-12 shrink-0 cursor-pointer rounded-full transition-colors ${darkMode ? 'bg-primary' : 'bg-outline-variant'}`}
                   >
-                    <span
-                      className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-md ring-0 transition-transform duration-300 mt-1 ml-1 ${
-                        darkMode ? 'translate-x-6' : 'translate-x-0'
-                      }`}
-                    />
+                    <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition-transform mt-1 ml-1 ${darkMode ? 'translate-x-6' : 'translate-x-0'}`} />
                   </button>
                 </div>
               </div>
 
-              {/* Notifications Card */}
-              <div className="bg-white rounded-[2rem] p-5 sm:p-6 shadow-[0px_4px_20px_rgba(0,0,0,0.04)] border border-outline-variant/20">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="bg-secondary-container p-1 rounded-xl">
-                    <span className="material-symbols-outlined text-secondary text-[24px]">notifications_active</span>
+              {/* Notifications */}
+              <div className="bg-surface-container-lowest rounded-[2rem] p-6 border border-outline-variant/20 shadow-sm space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="bg-secondary-container p-2 rounded-xl text-secondary">
+                    <span className="material-symbols-outlined text-xl">notifications</span>
                   </div>
-                  <h3 className="font-headline-md text-headline-md text-on-surface">Notifications</h3>
+                  <h3 className="font-headline-md text-lg font-bold text-on-surface">Notifications</h3>
                 </div>
-                <div className="space-y-3">
-                  <label className="flex items-center justify-between p-3 bg-surface-container-low rounded-xl cursor-pointer hover:bg-surface-container transition-colors border border-outline-variant/20">
-                    <span className="font-label-md text-label-md">Daily reminders</span>
+
+                <div className="space-y-3 text-xs font-semibold">
+                  <label className="flex items-center justify-between p-3 bg-surface-container-low rounded-xl cursor-pointer">
+                    <span>Daily Check-in Reminder</span>
                     <input
+                      type="checkbox"
                       checked={dailyReminders}
                       onChange={(e) => setDailyReminders(e.target.checked)}
-                      className="rounded-sm border-primary text-primary focus:ring-primary/20"
-                      type="checkbox"
+                      className="rounded text-primary focus:ring-primary"
                     />
                   </label>
-                  <label className="flex items-center justify-between p-3 bg-surface-container-low rounded-xl cursor-pointer hover:bg-surface-container transition-colors border border-outline-variant/20">
-                    <span className="font-label-md text-label-md">Clinical updates</span>
+                  <label className="flex items-center justify-between p-3 bg-surface-container-low rounded-xl cursor-pointer">
+                    <span>Email Digest &amp; Tips</span>
                     <input
-                      checked={clinicalUpdates}
-                      onChange={(e) => setClinicalUpdates(e.target.checked)}
-                      className="rounded-sm border-primary text-primary focus:ring-primary/20"
                       type="checkbox"
+                      checked={emailNotifs}
+                      onChange={(e) => setEmailNotifs(e.target.checked)}
+                      className="rounded text-primary focus:ring-primary"
                     />
                   </label>
                 </div>
               </div>
             </div>
 
-            {/* ── Security & Privacy ───────────────────────────── */}
-            <div className="bg-white rounded-[2rem] p-5 sm:p-6 shadow-[0px_4px_20px_rgba(0,0,0,0.04)] border border-outline-variant/20">
-              <div className="flex items-center gap-4 mb-6 md:mb-10">
-                <div className="bg-tertiary-fixed p-1 rounded-xl">
-                  <span className="material-symbols-outlined text-tertiary text-[24px]">security</span>
+            {/* Privacy & Security */}
+            <div className="bg-surface-container-lowest rounded-[2rem] p-6 border border-outline-variant/20 shadow-sm space-y-6">
+              <div className="flex items-center gap-3">
+                <div className="bg-tertiary-container/30 p-2 rounded-xl text-tertiary">
+                  <span className="material-symbols-outlined text-xl">security</span>
                 </div>
-                <h3 className="font-headline-md text-headline-md text-on-surface">Security &amp; Privacy</h3>
+                <h3 className="font-headline-md text-lg font-bold text-on-surface">Privacy &amp; Data</h3>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-12">
-                {/* Account Security */}
-                <div className="space-y-4 sm:space-y-6">
-                  <h4 className="font-label-md text-label-md text-primary uppercase tracking-wider">Account Security</h4>
-                  <button className="w-full flex items-center justify-between p-4 bg-surface-container-low rounded-2xl hover:shadow-sm transition-all group border border-outline-variant/20">
-                    <div className="text-left">
-                      <p className="font-label-md text-label-md text-on-surface">Change Password</p>
-                      <p className="text-label-sm text-on-surface-variant">Last changed 3 months ago</p>
-                    </div>
-                    <span className="material-symbols-outlined text-on-surface-variant group-hover:translate-x-1 transition-transform">chevron_right</span>
-                  </button>
-                  <button className="w-full flex items-center justify-between p-4 bg-surface-container-low rounded-2xl hover:shadow-sm transition-all group border border-outline-variant/20">
-                    <div className="text-left">
-                      <p className="font-label-md text-label-md text-on-surface">Two-Factor Authentication</p>
-                      <p className="text-label-sm text-secondary font-medium">Enabled (SMS)</p>
-                    </div>
-                    <span className="material-symbols-outlined text-on-surface-variant group-hover:translate-x-1 transition-transform">chevron_right</span>
-                  </button>
-                </div>
-                {/* Data & Privacy */}
-                <div className="space-y-4 sm:space-y-6">
-                  <h4 className="font-label-md text-label-md text-primary uppercase tracking-wider">Data &amp; Privacy</h4>
-                  <button className="w-full flex items-center justify-between p-4 bg-surface-container-low rounded-2xl hover:shadow-sm transition-all group border border-outline-variant/20">
-                    <div className="text-left">
-                      <p className="font-label-md text-label-md text-on-surface">Export Your Data</p>
-                      <p className="text-label-sm text-on-surface-variant">Download a JSON of your history</p>
-                    </div>
-                    <span className="material-symbols-outlined text-on-surface-variant group-hover:translate-x-1 transition-transform">download</span>
-                  </button>
-                  <button className="w-full flex items-center justify-between p-4 bg-surface-container-high/20 border border-error/10 rounded-2xl hover:bg-error-container/10 transition-all group">
-                    <div className="text-left">
-                      <p className="font-label-md text-label-md text-error">Deactivate Account</p>
-                      <p className="text-label-sm text-on-surface-variant">Temporarily disable access</p>
-                    </div>
-                    <span className="material-symbols-outlined text-error group-hover:translate-x-1 transition-transform">no_accounts</span>
-                  </button>
-                </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <button
+                  onClick={handleExportData}
+                  className="p-4 bg-surface-container-low rounded-2xl border border-outline-variant/20 flex items-center justify-between hover:bg-surface-container-high transition text-left"
+                >
+                  <div>
+                    <p className="font-bold text-xs text-on-surface">Export Personal Data</p>
+                    <p className="text-[10px] text-on-surface-variant">Download JSON backup of your metrics</p>
+                  </div>
+                  <span className="material-symbols-outlined text-primary text-xl">download</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    if (window.confirm('Reset all MindEase data to default defaults?')) {
+                      resetAllData();
+                      showToast('Data reset to defaults!');
+                    }
+                  }}
+                  className="p-4 bg-error/10 border border-error/20 rounded-2xl flex items-center justify-between hover:bg-error/20 transition text-left"
+                >
+                  <div>
+                    <p className="font-bold text-xs text-error">Reset App Storage</p>
+                    <p className="text-[10px] text-on-surface-variant">Clear local storage state</p>
+                  </div>
+                  <span className="material-symbols-outlined text-error text-xl">restart_alt</span>
+                </button>
               </div>
             </div>
 
-            {/* ── Footer Buttons ───────────────────────────────── */}
-            <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-4 pt-6">
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4">
               <button
                 onClick={handleDiscard}
-                className="w-full sm:w-auto px-8 py-3 text-primary font-label-md text-label-md rounded-full border border-primary/20 hover:bg-primary/5 transition-colors text-center"
+                className="px-6 py-3 border border-outline-variant/30 text-on-surface-variant rounded-full font-bold text-xs hover:bg-surface-container-high transition"
               >
                 Discard Changes
               </button>
               <button
                 onClick={handleSave}
-                className="w-full sm:w-auto px-8 py-3 bg-primary text-white font-label-md text-label-md rounded-full shadow-lg shadow-primary/20 hover:shadow-xl hover:translate-y-[-2px] active:translate-y-0 transition-all text-center"
+                className="px-8 py-3 bg-primary text-white font-bold text-xs rounded-full shadow-lg hover:opacity-90 transition"
               >
                 Save All Changes
               </button>
             </div>
-
 
           </div>
         </section>
@@ -247,7 +240,7 @@ function Settings() {
 
       {/* Toast Notification */}
       {toastMsg && (
-        <div className="fixed bottom-24 md:bottom-10 left-1/2 -translate-x-1/2 z-50 bg-inverse-surface text-inverse-on-surface px-5 py-2.5 rounded-full text-xs font-semibold shadow-lg animate-fade-in flex items-center gap-2">
+        <div className="fixed bottom-24 md:bottom-10 left-1/2 -translate-x-1/2 z-50 bg-inverse-surface text-inverse-on-surface px-5 py-2.5 rounded-full text-xs font-semibold shadow-lg flex items-center gap-2">
           <span className="material-symbols-outlined text-base text-secondary">check_circle</span>
           <span>{toastMsg}</span>
         </div>

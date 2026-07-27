@@ -130,8 +130,8 @@ function Chat() {
       const botMsg = {
         id: `bot_${Date.now()}`,
         role: 'bot',
-        text: data.reply || data.response || data.message || "I'm here for you. Could you tell me more?",
-        exercise: data.exercise || null,
+        text: data.bot_message?.content || data.reply || data.response || data.message || "I'm here for you. Could you tell me more?",
+        exercise: data.bot_message?.strategy || data.exercise || null,
         emotion: data.emotion || null,
       };
       setMessages((prev) => [...prev, botMsg]);
@@ -247,7 +247,6 @@ function Chat() {
             </p>
           </div>
         </div>
-
 
         <div className="flex items-center gap-2 relative">
           {/* History Icon Button */}
@@ -404,7 +403,6 @@ function Chat() {
           {/* Messages */}
           {messages.map((msg) =>
             msg.role === 'bot' ? (
-              /* Bot Message */
               <div key={msg.id} className="flex gap-4 items-start animate-slide-up">
                 <div className="w-10 h-10 rounded-full bg-primary-container flex-shrink-0 flex items-center justify-center shadow-sm">
                   <span className="material-symbols-outlined text-on-primary-container text-md" style={{ fontVariationSettings: "'FILL' 1" }}>psychology</span>
@@ -412,7 +410,6 @@ function Chat() {
                 <div className={`max-w-[85%] ${msg.isError ? 'bg-error-container border border-error/20' : 'bg-white border border-outline-variant/30'} p-md rounded-[1.25rem] rounded-bl-[4px] shadow-[0_20px_40px_-15px_rgba(0,89,186,0.04)] space-y-md`}>
                   <p className={`${msg.isError ? 'text-on-error-container' : 'text-on-surface'} leading-relaxed`}>{msg.text}</p>
 
-                  {/* Optional exercise card inside bot response */}
                   {msg.exercise && (
                     <div className="bg-surface-container-low rounded-xl p-4 border-l-4 border-secondary">
                       <h4 className="font-bold text-on-surface text-label-md mb-1">Recommended Exercise</h4>
@@ -423,13 +420,11 @@ function Chat() {
                 </div>
               </div>
             ) : (
-              /* User Message */
               <div key={msg.id} className="flex flex-row-reverse gap-4 items-start animate-slide-up">
                 <div className="w-10 h-10 rounded-full bg-primary-fixed flex-shrink-0 flex items-center justify-center shadow-sm">
                   <span className="material-symbols-outlined text-on-primary-fixed text-md fill-icon">person</span>
                 </div>
                 <div className="max-w-[85%] bg-primary text-on-primary p-md rounded-[1.25rem] rounded-br-[4px] shadow-lg shadow-primary/10 space-y-2">
-                  {/* Render attached image or file badge inside chat bubble */}
                   {msg.attachment && (
                     <div className="mb-2">
                       {msg.attachment.isImage ? (
@@ -464,12 +459,11 @@ function Chat() {
             </div>
           )}
 
-          {/* Scroll anchor */}
           <div ref={messagesEndRef} />
         </div>
       </div>
 
-      {/* Sticky Interaction Area — pinned to bottom */}
+      {/* Sticky Interaction Area */}
       <div className="shrink-0 bg-gradient-to-t from-background via-background to-transparent pt-4 pb-6 px-margin-mobile md:px-0">
         <div className="max-w-[720px] mx-auto space-y-3">
           {/* Quick Actions chips */}
@@ -536,7 +530,6 @@ function Chat() {
           {/* Message Input Form */}
           <form onSubmit={handleSubmit} className="relative glass-panel rounded-full p-2 border border-outline-variant/50 shadow-lg shadow-primary/5 group focus-within:ring-2 focus-within:ring-primary/20 transition-all bg-surface">
             <div className="flex items-center px-4">
-              {/* Plus Sign Button for File/Image Upload */}
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
