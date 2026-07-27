@@ -1,48 +1,20 @@
 import React, { useState, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useLayout } from '../components/Layout';
 import { useTheme } from '../context/ThemeContext';
-
-const DEFAULT_AVATAR = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80';
-
-const achievements = [
-  { title: 'Serenity Seeker', badge: '10 Meditations', icon: 'self_improvement', bg: 'bg-primary-container text-on-primary-container' },
-  { title: 'Consistency King', badge: '7 Day Streak', icon: 'bolt', bg: 'bg-secondary-container text-on-secondary-container' },
-  { title: 'Deep Rest', badge: '5 Sleep Stories', icon: 'nightlight', bg: 'bg-tertiary-fixed text-on-tertiary-fixed' },
-];
-
-const moodBars = [
-  { day: 'Mon', height: '40%', active: false },
-  { day: 'Tue', height: '65%', active: false },
-  { day: 'Wed', height: '85%', active: false },
-  { day: 'Thu', height: '55%', active: false },
-  { day: 'Fri', height: '90%', active: false },
-  { day: 'Sat', height: '75%', active: false },
-  { day: 'Sun', height: '95%', active: true },
-];
+import { useData } from '../context/DataContext';
 
 function Profile() {
   const { toggleMobileMenu } = useLayout();
   const { darkMode, setDarkMode } = useTheme();
+  const { profile, updateProfile, resources, resetAllData } = useData();
   const avatarInputRef = useRef(null);
-  const docInputRef = useRef(null);
+  const navigate = useNavigate();
 
-  // Profile Avatar state with localStorage persistence
-  const [avatarUrl, setAvatarUrl] = useState(() => {
-    return localStorage.getItem('mindease_user_avatar') || DEFAULT_AVATAR;
-  });
-
-  const [userName, setUserName] = useState(() => localStorage.getItem('mindease_user_name') || 'Eleanor Vance');
-  const [userBio, setUserBio] = useState('Maintaining a 12-day mindfulness streak. "One day at a time, finding peace in the present."');
-  const [userLocation] = useState('Seattle, WA');
-  const [dailyReminders, setDailyReminders] = useState(true);
-
-
-  // Uploaded documents state
-  const [documents, setDocuments] = useState([
-    { id: 'doc-1', name: 'Mindfulness_Journal_July.pdf', size: '1.2 MB', date: 'July 15, 2026' },
-    { id: 'doc-2', name: 'Therapy_Session_Notes.docx', size: '450 KB', date: 'June 28, 2026' },
-  ]);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editName, setEditName] = useState(profile.name);
+  const [editEmail, setEditEmail] = useState(profile.email);
+  const [editBio, setEditBio] = useState(profile.bio);
 
   const [toastMsg, setToastMsg] = useState(null);
 
@@ -51,56 +23,38 @@ function Profile() {
     setTimeout(() => setToastMsg(null), 3000);
   };
 
-  // Avatar Upload Handler
+  const handleSaveProfile = (e) => {
+    e.preventDefault();
+    updateProfile({
+      name: editName,
+      email: editEmail,
+      bio: editBio
+    });
+    setEditModalOpen(false);
+    showToast('Profile updated successfully!');
+  };
+
   const handleAvatarSelect = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    if (!file.type.startsWith('image/')) {
-      showToast('Please select a valid image file (PNG, JPG, WEBP).');
-      return;
-    }
 
     const reader = new FileReader();
     reader.onload = (event) => {
       const result = event.target?.result;
       if (result) {
-        setAvatarUrl(result);
-        localStorage.setItem('mindease_user_avatar', result);
-        showToast('Profile photo updated successfully!');
+        updateProfile({ avatar: result });
+        showToast('Profile photo updated!');
       }
     };
     reader.readAsDataURL(file);
     e.target.value = '';
   };
 
-  // Document Upload Handler
-  const handleDocumentSelect = (e) => {
-    const files = Array.from(e.target.files || []);
-    if (!files.length) return;
-
-    const newDocs = files.map((file) => ({
-      id: `doc_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
-      name: file.name,
-      size: `${(file.size / 1024 / 1024).toFixed(2)} MB`,
-      date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-    }));
-
-    setDocuments((prev) => [...newDocs, ...prev]);
-    showToast(`Uploaded ${files.length} document${files.length > 1 ? 's' : ''}!`);
-    e.target.value = '';
-  };
-
-  const removeDocument = (id) => {
-    setDocuments((prev) => prev.filter((d) => d.id !== id));
-    showToast('Document removed.');
-  };
+  const savedResourcesList = resources.filter((r) => profile.savedResourceIds.includes(r.id));
 
   return (
     <div className="flex-1 flex flex-col min-h-0 overflow-hidden bg-background relative">
-      {/* Hidden File Inputs */}
       <input ref={avatarInputRef} type="file" accept="image/*" onChange={handleAvatarSelect} className="hidden" />
-      <input ref={docInputRef} type="file" multiple accept="image/*,.pdf,.doc,.docx,.txt" onChange={handleDocumentSelect} className="hidden" />
 
       {/* Top Header */}
       <header className="h-20 w-full flex justify-between items-center px-margin-mobile md:px-margin-desktop bg-surface/80 backdrop-blur-xl border-b border-outline-variant/30 shrink-0 z-10">
@@ -115,19 +69,24 @@ function Profile() {
         </div>
 
         <div className="flex items-center gap-3">
-          <Link
-            to="/login"
-            className="bg-surface-container-high text-error px-4 py-2 rounded-full font-label-md text-label-md hover:bg-error-container hover:text-on-error-container transition-colors flex items-center gap-2 text-xs font-bold"
+          <button
+            onClick={() => {
+              setEditName(profile.name);
+              setEditEmail(profile.email);
+              setEditBio(profile.bio);
+              setEditModalOpen(true);
+            }}
+            className="bg-primary text-white px-4 py-2 rounded-full font-label-md hover:opacity-90 transition flex items-center gap-1.5 text-xs font-bold shadow"
           >
-            <span className="material-symbols-outlined text-base">logout</span>
-            <span className="hidden sm:inline">Sign Out</span>
-          </Link>
+            <span className="material-symbols-outlined text-sm">edit</span>
+            <span>Edit Profile</span>
+          </button>
         </div>
       </header>
 
       {/* Toast Notification */}
       {toastMsg && (
-        <div className="fixed bottom-24 md:bottom-10 left-1/2 -translate-x-1/2 z-50 bg-inverse-surface text-inverse-on-surface px-5 py-2.5 rounded-full text-xs font-semibold shadow-lg animate-fade-in flex items-center gap-2">
+        <div className="fixed bottom-24 md:bottom-10 left-1/2 -translate-x-1/2 z-50 bg-inverse-surface text-inverse-on-surface px-5 py-2.5 rounded-full text-xs font-semibold shadow-lg flex items-center gap-2">
           <span className="material-symbols-outlined text-base text-secondary">check_circle</span>
           <span>{toastMsg}</span>
         </div>
@@ -135,17 +94,16 @@ function Profile() {
 
       {/* Scrollable Page Content */}
       <div className="flex-1 overflow-y-auto custom-scrollbar relative">
-        {/* Top Atmospheric Gradient Effect */}
         <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-primary-fixed/30 to-transparent -z-10" />
 
         <main className="p-margin-mobile md:p-margin-desktop max-w-[1000px] mx-auto space-y-10 py-10">
 
-          {/* ── Profile Header Section ────────────────────────── */}
+          {/* Profile Header Section */}
           <header className="flex flex-col md:flex-row items-center gap-8">
-            <div className="relative group cursor-pointer" onClick={() => avatarInputRef.current?.click()} title="Click to upload profile photo">
+            <div className="relative group cursor-pointer" onClick={() => avatarInputRef.current?.click()} title="Click to change photo">
               <img
-                src={avatarUrl}
-                alt={userName}
+                src={profile.avatar}
+                alt={profile.name}
                 className="w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-white shadow-xl object-cover"
               />
               <button
@@ -156,209 +114,195 @@ function Profile() {
                 }}
                 className="absolute bottom-2 right-2 bg-primary text-white p-2.5 rounded-full shadow-lg border-2 border-white hover:scale-105 transition-transform"
               >
-                <span className="material-symbols-outlined text-sm">edit</span>
+                <span className="material-symbols-outlined text-sm">photo_camera</span>
               </button>
             </div>
 
             <div className="text-center md:text-left space-y-2 w-full">
-              <h2 className="font-headline-lg text-[30px] font-bold text-on-surface">{userName}</h2>
-              <p className="font-body-md text-on-surface-variant max-w-full text-sm">{userBio}</p>
+              <h2 className="font-headline-lg text-[30px] font-bold text-on-surface">{profile.name}</h2>
+              <p className="font-body-md text-on-surface-variant max-w-full text-sm">{profile.bio}</p>
+              <p className="text-xs text-outline font-mono">{profile.email}</p>
+
               <div className="flex flex-wrap gap-2 pt-2 justify-center md:justify-start">
-                <span className="px-3 py-1 bg-secondary-container text-on-secondary-container text-xs font-bold rounded-full">
-                  Pro Member
+                <span className="px-3.5 py-1.5 flex items-center gap-1.5 bg-amber-500/10 text-amber-600 text-xs font-bold rounded-full border border-amber-500/20">
+                  <span className="material-symbols-outlined text-sm">local_fire_department</span>
+                  {profile.streak} Day Streak
                 </span>
-                <span className="px-3 py-1 bg-surface-container-highest text-on-surface-variant text-xs font-bold rounded-full flex items-center gap-1">
-                  <span className="material-symbols-outlined text-xs">location_on</span> {userLocation}
+                <span className="px-3.5 py-1.5 bg-emerald-500/10 text-emerald-600 text-xs font-bold rounded-full flex items-center gap-1 border border-emerald-500/20">
+                  <span className="material-symbols-outlined text-sm">task_alt</span>
+                  {profile.totalSessions} Sessions Completed
                 </span>
-                <button
-                  onClick={() => avatarInputRef.current?.click()}
-                  className="px-3 py-1 bg-primary/10 border border-primary/20 text-primary rounded-full text-xs font-semibold hover:bg-primary/20 transition-all flex items-center gap-1"
-                >
-                  <span className="material-symbols-outlined text-xs">upload</span>
-                  Upload Photo
-                </button>
               </div>
             </div>
           </header>
 
-          {/* ── Bento Grid Content ────────────────────────────── */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-            {/* Achievements & Mood Trends (2 cols) */}
-            <section className="md:col-span-2 bg-white/80 backdrop-blur-md p-6 md:p-8 rounded-[2rem] border border-white/50 shadow-sm space-y-6">
-              <div className="flex justify-between items-center">
-                <h3 className="font-headline-md text-xl font-bold text-on-surface">Wellness Achievements</h3>
-                <button className="text-primary font-label-md text-xs font-semibold hover:underline">View All</button>
-              </div>
-
-              {/* Badges Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                {achievements.map((item) => (
-                  <div
-                    key={item.title}
-                    className="bg-surface-container-low p-4 rounded-2xl flex flex-col items-center text-center space-y-2 border border-outline-variant/20 hover:border-primary/30 transition-colors"
-                  >
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center ${item.bg}`}>
-                      <span className="material-symbols-outlined text-xl">{item.icon}</span>
-                    </div>
-                    <p className="font-label-md text-on-surface font-bold text-xs">{item.title}</p>
-                    <p className="text-[10px] text-on-surface-variant uppercase tracking-wider font-semibold">{item.badge}</p>
+          {/* Achievements Section */}
+          <section className="bg-surface-container-lowest p-6 md:p-8 rounded-[2rem] border border-outline-variant/20 shadow-sm space-y-6">
+            <h3 className="font-headline-md text-xl font-bold text-on-surface">Earned Badges & Achievements</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {profile.badges.map((b) => (
+                <div key={b.id} className="bg-surface-container-low p-4 rounded-2xl flex flex-col items-center text-center space-y-2 border border-outline-variant/10">
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center ${b.color}`}>
+                    <span className="material-symbols-outlined text-2xl">{b.icon}</span>
                   </div>
-                ))}
-              </div>
-
-              {/* Mood Trends Graph */}
-              <div className="mt-4 pt-6 border-t border-outline-variant/20">
-                <p className="font-label-md text-on-surface font-bold text-sm mb-4">Mood Trends (Last 7 Days)</p>
-                <div className="h-32 w-full flex items-end justify-between gap-2 px-2">
-                  {moodBars.map((bar) => (
-                    <div
-                      key={bar.day}
-                      className={`w-full rounded-t-lg transition-all hover:bg-primary ${bar.active ? 'bg-primary shadow-lg shadow-primary/20' : 'bg-primary/20'
-                        }`}
-                      style={{ height: bar.height }}
-                    />
-                  ))}
-                </div>
-                <div className="flex justify-between mt-2 px-1 text-[10px]">
-                  {moodBars.map((bar) => (
-                    <span key={bar.day} className={bar.active ? 'text-primary font-bold' : 'text-outline'}>
-                      {bar.day}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </section>
-
-            {/* Preferences & Security (1 col) */}
-            <section className="space-y-6">
-              {/* Preferences Card */}
-              <div className="bg-white/80 backdrop-blur-md p-6 rounded-[2rem] border border-white/50 shadow-sm space-y-4">
-                <h3 className="font-headline-sm text-base font-bold text-on-surface">Preferences</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-xs font-semibold text-on-surface">
-                      <span className="material-symbols-outlined text-primary text-lg">notifications</span>
-                      <span>Daily Reminders</span>
-                    </div>
-                    <button
-                      onClick={() => setDailyReminders(!dailyReminders)}
-                      className={`relative inline-flex h-5 w-10 shrink-0 cursor-pointer rounded-full transition-colors ${dailyReminders ? 'bg-primary' : 'bg-outline-variant'
-                        }`}
-                    >
-                      <span
-                        className={`pointer-events-none inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow ring-0 transition-transform mt-0.5 ml-0.5 ${dailyReminders ? 'translate-x-5' : 'translate-x-0'
-                          }`}
-                      />
-                    </button>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-xs font-semibold text-on-surface">
-                      <span className="material-symbols-outlined text-primary text-lg">dark_mode</span>
-                      <span>Dark Mode</span>
-                    </div>
-                    <button
-                      onClick={() => setDarkMode(!darkMode)}
-                      className={`relative inline-flex h-5 w-10 shrink-0 cursor-pointer rounded-full transition-colors ${darkMode ? 'bg-primary' : 'bg-outline-variant'
-                        }`}
-                    >
-                      <span
-                        className={`pointer-events-none inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow ring-0 transition-transform mt-0.5 ml-0.5 ${darkMode ? 'translate-x-5' : 'translate-x-0'
-                          }`}
-                      />
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Privacy & Security Card */}
-              <div className="bg-surface-container-highest/40 p-6 rounded-[2rem] border border-outline-variant/30 space-y-3">
-                <div className="flex items-center gap-2 text-on-surface">
-                  <span className="material-symbols-outlined text-on-surface-variant text-lg">lock</span>
-                  <h4 className="font-bold text-xs">Privacy &amp; Security</h4>
-                </div>
-                <p className="text-[11px] text-on-surface-variant leading-relaxed">Your clinical data is end-to-end encrypted and HIPAA compliant.</p>
-                <Link
-                  to="/settings"
-                  className="w-full block py-2 px-4 border border-outline/50 rounded-xl text-xs font-bold text-center hover:bg-surface-container-high transition-colors text-on-surface"
-                >
-                  Manage Data &amp; Security
-                </Link>
-              </div>
-            </section>
-          </div>
-
-          {/* ── My Uploaded Files & Documents Section ────────── */}
-          <section className="bg-white rounded-[2rem] p-6 md:p-8 border border-outline-variant/20 shadow-sm space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div>
-                <h3 className="font-headline-sm text-lg font-bold text-on-surface flex items-center gap-2">
-                  <span className="material-symbols-outlined text-primary">folder_open</span>
-                  <span>My Uploaded Documents &amp; Records</span>
-                </h3>
-                <p className="text-xs text-on-surface-variant mt-0.5">Upload therapy notes, journals, or health records securely.</p>
-              </div>
-              <button
-                onClick={() => docInputRef.current?.click()}
-                className="bg-primary text-white px-5 py-2 rounded-full text-xs font-semibold hover:bg-primary/90 active:scale-95 transition-all flex items-center justify-center gap-2 shadow-sm self-start sm:self-auto"
-              >
-                <span className="material-symbols-outlined text-base">cloud_upload</span>
-                <span>Upload File</span>
-              </button>
-            </div>
-
-            {/* Document List */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {documents.map((doc) => (
-                <div
-                  key={doc.id}
-                  className="flex items-center justify-between p-4 rounded-2xl bg-surface-container-low border border-outline-variant/30 hover:border-primary/30 transition-all"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                      <span className="material-symbols-outlined text-lg">description</span>
-                    </div>
-                    <div>
-                      <p className="font-bold text-on-surface text-xs truncate max-w-[180px]">{doc.name}</p>
-                      <p className="text-[10px] text-on-surface-variant">{doc.size} • {doc.date}</p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => removeDocument(doc.id)}
-                    className="p-1.5 text-on-surface-variant hover:text-error transition-colors rounded-lg hover:bg-error/10"
-                    title="Remove file"
-                  >
-                    <span className="material-symbols-outlined text-base">delete</span>
-                  </button>
+                  <p className="font-label-md text-on-surface font-bold text-xs">{b.name}</p>
                 </div>
               ))}
             </div>
           </section>
 
-          {/* ── Quick Crisis Support CTA Section ────────────── */}
-          <section className="mt-10 text-center p-8 bg-surface-container  rounded-[2rem] border border-primary/10 space-y-4">
-            <h3 className="font-headline-md text-xl font-bold text-on-surface">Need to talk to someone right now?</h3>
-            <p className="text-xs text-on-surface-variant max-w-full  mx-auto leading-relaxed">
-              Our crisis team is available 24/7. Don't hesitate to reach out if you're feeling overwhelmed.
-            </p>
-            <div className="flex flex-wrap justify-center gap-4 pt-2">
-              <Link
-                to="/emergency"
-                className="bg-error text-white font-bold py-3 px-8 rounded-full text-xs shadow-lg shadow-error/20 hover:scale-105 active:scale-95 transition-all"
+          {/* Saved Resources & Assessment History Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            {/* Saved Resources */}
+            <section className="bg-surface-container-lowest p-6 rounded-[2rem] border border-outline-variant/20 shadow-sm space-y-4">
+              <h3 className="font-headline-md text-lg font-bold text-on-surface flex items-center gap-2">
+                <span className="material-symbols-outlined text-primary">bookmark</span>
+                <span>Saved Resources ({savedResourcesList.length})</span>
+              </h3>
+
+              {savedResourcesList.length > 0 ? (
+                <div className="space-y-3">
+                  {savedResourcesList.map((r) => (
+                    <div key={r.id} className="p-3 bg-surface-container-low rounded-xl flex items-center justify-between text-xs">
+                      <div>
+                        <p className="font-bold text-on-surface line-clamp-1">{r.title}</p>
+                        <span className="text-[10px] text-primary">{r.category} • {r.readTime}</span>
+                      </div>
+                      <Link to="/resources" className="text-primary font-semibold hover:underline">View</Link>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-on-surface-variant">No saved resources yet. Bookmark articles from the Resource library!</p>
+              )}
+            </section>
+
+            {/* Assessment History */}
+            <section className="bg-surface-container-lowest p-6 rounded-[2rem] border border-outline-variant/20 shadow-sm space-y-4">
+              <h3 className="font-headline-md text-lg font-bold text-on-surface flex items-center gap-2">
+                <span className="material-symbols-outlined text-primary">psychology</span>
+                <span>Assessment History</span>
+              </h3>
+
+              {profile.assessmentHistory.length > 0 ? (
+                <div className="space-y-3">
+                  {profile.assessmentHistory.map((asm) => (
+                    <div key={asm.id} className="p-3 bg-surface-container-low rounded-xl space-y-1 text-xs">
+                      <div className="flex justify-between items-center font-bold">
+                        <span className="text-on-surface">{asm.level} (Score: {asm.score})</span>
+                        <span className="text-[10px] text-outline">{asm.date}</span>
+                      </div>
+                      <p className="text-on-surface-variant text-[11px]">Rec: {asm.recommendation}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-on-surface-variant">No past assessments found. Take a quiz anytime!</p>
+              )}
+            </section>
+
+          </div>
+
+          {/* Quick Settings & Theme Control */}
+          <section className="bg-surface-container-lowest p-6 rounded-[2rem] border border-outline-variant/20 shadow-sm space-y-4">
+            <h3 className="font-headline-md text-base font-bold text-on-surface">Quick Preferences</h3>
+            <div className="flex items-center justify-between text-xs font-semibold">
+              <div className="flex items-center gap-2 text-on-surface">
+                <span className="material-symbols-outlined text-primary">dark_mode</span>
+                <span>Dark Appearance</span>
+              </div>
+              <button
+                onClick={() => setDarkMode(!darkMode)}
+                className={`relative inline-flex h-5 w-10 shrink-0 cursor-pointer rounded-full transition-colors ${darkMode ? 'bg-primary' : 'bg-outline-variant'}`}
               >
-                Get Immediate Help
-              </Link>
-              <Link
-                to="/chat"
-                className="bg-white border border-primary text-primary font-bold py-3 px-8 rounded-full text-xs hover:bg-primary-container/10 transition-all"
-              >
-                Chat with Assistant
-              </Link>
+                <span className={`pointer-events-none inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform mt-0.5 ml-0.5 ${darkMode ? 'translate-x-5' : 'translate-x-0'}`} />
+              </button>
             </div>
+          </section>
+
+          {/* Sign Out */}
+          <section className="bg-surface-container-lowest p-6 rounded-[2rem] border border-outline-variant/20 shadow-sm space-y-4">
+            <h3 className="font-headline-md text-base font-bold text-on-surface">Account</h3>
+            <p className="text-xs text-on-surface-variant">Sign out of your account on this device. Your streak and data will be cleared.</p>
+            <button
+              onClick={() => {
+                resetAllData();
+                navigate('/');
+              }}
+              className="flex items-center gap-2 px-6 py-3 rounded-full bg-error/10 text-error font-bold text-xs border border-error/20 hover:bg-error hover:text-white transition-all active:scale-95"
+            >
+              <span className="material-symbols-outlined text-base">logout</span>
+              <span>Sign Out</span>
+            </button>
           </section>
 
         </main>
       </div>
+
+      {/* Edit Profile Modal */}
+      {editModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-surface-container-lowest max-w-2xl w-full rounded-3xl p-6 shadow-2xl space-y-4">
+            <div className="flex justify-between items-center">
+              <h3 className="font-headline-md font-bold text-on-surface text-lg">Edit Profile Details</h3>
+              <button onClick={() => setEditModalOpen(false)} className="p-1 text-on-surface-variant hover:text-primary">
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveProfile} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-on-surface-variant mb-1">Full Name</label>
+                <input
+                  type="text"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  required
+                  className="w-full p-3 rounded-xl bg-surface-container-low border border-outline-variant/20 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-on-surface-variant mb-1">Email Address</label>
+                <input
+                  type="email"
+                  value={editEmail}
+                  onChange={(e) => setEditEmail(e.target.value)}
+                  required
+                  className="w-full p-3 rounded-xl bg-surface-container-low border border-outline-variant/20 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-on-surface-variant mb-1">Bio / Affirmation</label>
+                <textarea
+                  rows={3}
+                  value={editBio}
+                  onChange={(e) => setEditBio(e.target.value)}
+                  className="w-full p-3 rounded-xl bg-surface-container-low border border-outline-variant/20 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setEditModalOpen(false)}
+                  className="px-5 py-2.5 rounded-full text-xs font-bold border hover:bg-surface-container-high"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2.5 rounded-full text-xs font-bold bg-primary text-white hover:opacity-90 shadow"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

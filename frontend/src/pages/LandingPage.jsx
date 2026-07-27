@@ -1,259 +1,223 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Footer from '../components/Footer';
+import { useData } from '../context/DataContext';
 
 function LandingPage() {
+  const { landingStats, testimonials, faqs, profile } = useData();
+  const [billingCycle, setBillingCycle] = useState('monthly'); // 'monthly' | 'yearly'
+  const [featureSearch, setFeatureSearch] = useState('');
+
+  const features = [
+    { title: 'Stress Detection & Alerting', desc: 'Real-time analysis of language triggers to mitigate burnout before it escalates.', icon: 'monitor_heart', color: 'bg-rose-500/10 text-rose-600' },
+    { title: 'Grounding & Panic Assistance', desc: 'Instant 5-4-3-2-1 sensory exercises to calm your central nervous system.', icon: 'spa', color: 'bg-emerald-500/10 text-emerald-600' },
+    { title: 'Rhythmic Breathwork Guides', desc: '4-7-8 and box breathing animations for instant physical relaxation.', icon: 'air', color: 'bg-sky-500/10 text-sky-600' },
+    { title: 'CBT Cognitive Reframing', desc: 'Guided reflections that transform automatic negative thoughts into resilient actions.', icon: 'self_improvement', color: 'bg-amber-500/10 text-amber-600' },
+    { title: 'Circadian Sleep Hygiene', desc: 'Wind-down routines, ambient soundscapes, and nighttime relaxation guides.', icon: 'bedtime', color: 'bg-indigo-500/10 text-indigo-600' },
+    { title: 'Community Support & Moderation', desc: 'Safe, anonymous peer groups supervised by licensed clinical psychologists.', icon: 'diversity_3', color: 'bg-purple-500/10 text-purple-600' }
+  ];
+
+  const filteredFeatures = features.filter((f) =>
+    f.title.toLowerCase().includes(featureSearch.toLowerCase()) ||
+    f.desc.toLowerCase().includes(featureSearch.toLowerCase())
+  );
+
   return (
     <div className="bg-background text-on-background selection:bg-primary-fixed selection:text-on-primary-fixed">
       {/* TopNavBar */}
       <nav className="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-xl border-b border-outline-variant/30 shadow-sm flex justify-between items-center px-margin-mobile md:px-margin-desktop h-20">
         <div className="flex items-center gap-10">
-          <span className="font-headline-md text-headline-md font-bold text-primary">MindEase</span>
+          <Link to="/" className="font-headline-md text-headline-md font-bold text-primary flex items-center gap-1">
+            <span className="material-symbols-outlined text-primary fill-icon">spa</span>
+            <span>MindEase</span>
+          </Link>
           <div className="hidden md:flex gap-8">
-            <Link to="/resources" className="text-primary font-bold border-b-2 border-primary pb-1 font-body-md text-body-md">Resources</Link>
+            <Link to="/resources" className="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md">Resources</Link>
             <Link to="/programs" className="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md">Programs</Link>
             <Link to="/community" className="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md">Community</Link>
           </div>
         </div>
         <div className="flex items-center gap-4">
-          <Link to="/login" className="hidden md:block text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md">Login</Link>
-          <Link to="/signup" className="bg-primary text-on-primary px-6 py-2.5 rounded-full font-label-md text-label-md hover:opacity-90 active:scale-95 transition-all">Get Started</Link>
+          {profile?.name ? (
+            <Link to="/dashboard" className="bg-primary text-white px-6 py-2.5 rounded-full font-bold text-xs shadow hover:opacity-90 transition">
+              Go to Dashboard
+            </Link>
+          ) : (
+            <>
+              <Link to="/login" className="hidden md:block text-on-surface-variant hover:text-primary font-body-md text-body-md">Login</Link>
+              <Link to="/signup" className="bg-primary text-on-primary px-6 py-2.5 rounded-full font-label-md text-label-md hover:opacity-90 active:scale-95 transition-all">Get Started</Link>
+            </>
+          )}
         </div>
       </nav>
 
       <main className="pt-20">
         {/* Hero Section */}
-        <section className="relative overflow-hidden pt-xl pb-xl md:py-32 hero-gradient">
+        <section className="relative overflow-hidden pt-xl pb-xl md:py-28 hero-gradient">
           <div className="container mx-auto px-margin-mobile md:px-margin-desktop flex flex-col items-center text-center max-w-5xl">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary-fixed text-on-primary-fixed-variant font-label-sm text-label-sm mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary font-bold text-xs mb-6 border border-primary/20">
               <span className="material-symbols-outlined text-sm">auto_awesome</span>
-              <span>AI-Powered Mental Health Support</span>
+              <span>Clinically-Informed Mental Wellbeing Platform</span>
             </div>
-            <h1 className="font-headline-xl-mobile md:font-headline-xl text-headline-xl-mobile md:text-headline-xl text-on-surface mb-6 max-w-3xl">
-              Your Mental Wellness Companion
+            <h1 className="font-headline-xl text-3xl sm:text-5xl md:text-6xl font-bold text-on-surface mb-6 max-w-4xl tracking-tight leading-tight">
+              Your Daily Sanctuary for Stress &amp; Anxiety Relief
             </h1>
-            <p className="font-body-lg text-body-lg text-on-surface-variant mb-10 max-w-2xl">
-              Manage stress, anxiety, and daily challenges with the help of clinically-informed AI. Gentle guidance designed for your emotional well-being.
+            <p className="font-body-lg text-body-lg text-on-surface-variant mb-8 max-w-2xl text-sm sm:text-base">
+              Manage overwhelm, improve sleep, and build emotional resilience through responsive AI companion support and CBT programs.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 mb-16">
-              <Link to="/chat" className="bg-primary text-on-primary px-8 py-4 rounded-full font-label-md text-label-md hover:opacity-90 active:scale-95 transition-all shadow-lg flex items-center gap-2">
-                <span>Start Chatting</span>
-                <span className="material-symbols-outlined">chat_bubble</span>
+
+            <div className="flex flex-col sm:flex-row gap-4 mb-14">
+              <Link to="/chat" className="bg-primary text-on-primary px-8 py-4 rounded-full font-bold hover:opacity-90 active:scale-95 transition-all shadow-lg flex items-center justify-center gap-2 text-sm">
+                <span>Start Free Conversation</span>
+                <span className="material-symbols-outlined">forum</span>
               </Link>
-              <Link to="/learn-more" className="border border-primary text-primary px-8 py-4 rounded-full font-label-md text-label-md hover:bg-primary-fixed transition-all active:scale-95 flex items-center justify-center">
-                Learn More
+              <Link to="/assessment" className="border border-primary text-primary px-8 py-4 rounded-full font-bold hover:bg-primary/5 transition-all active:scale-95 flex items-center justify-center text-sm">
+                Take 2-Min Assessment
               </Link>
             </div>
-            {/* Hero Artwork Placeholder */}
-            <div className="relative w-full aspect-video md:aspect-[21/9] rounded-3xl overflow-hidden shadow-2xl border border-outline-variant/20">
-              <img className="w-full h-full object-cover" data-alt="A serene and minimalist 3D digital landscape showing a peaceful zen garden at dawn. Soft pastel blues, lavenders, and mint greens dominate the palette, creating a therapeutic atmosphere. Gentle rippling water and abstract glass-like sculptures reflect soft morning light. The composition is clean, airy, and evokes a feeling of profound mental clarity and quietude." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDCjfJPs0HUmTaq5TRpk7pzjKQ2Jml2OUhJfnZK2di54KAAC1c8RhyTc2IBIi6ygcUVtGdNfoMDikZaZTQPymi7TSk2lWtNu9uFfwcb3vkxALRjR80QWANmXCLfdCZf4Kkq4Yg8b5XCPLho2pIbxSwVTvELWsfddJSlI7Ufbn6ycyqDKYvT8Evge_xnXJmpex71-LEaiLN1I4IDHrmLzx8kK1zjnIkwIbvyah7mAgfgXnajzKSc-p5fOwoOxTwB04PfSGpKEdPEuwO1" alt="Peaceful zen garden at dawn" />
-              <div className="absolute inset-0 bg-gradient-to-t from-background/40 to-transparent"></div>
+
+            {/* Dynamic Stats Banner */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 w-full max-w-4xl p-6 bg-surface-container-lowest rounded-3xl border border-outline-variant/20 shadow-md">
+              {landingStats.map((st) => (
+                <div key={st.label} className="text-center space-y-1">
+                  <p className="text-2xl sm:text-3xl font-bold text-primary">{st.value}</p>
+                  <p className="text-[11px] text-on-surface-variant font-semibold">{st.label}</p>
+                </div>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* Trust Indicators */}
-        <section className="py-xl bg-surface-container-low">
-          <div className="container mx-auto px-margin-mobile md:px-margin-desktop">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-gutter">
-              <div className="flex items-center gap-4 p-6 bg-surface rounded-2xl border border-outline-variant/10">
-                <div className="w-12 h-12 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container">
-                  <span className="material-symbols-outlined">lock</span>
-                </div>
-                <div>
-                  <h3 className="font-label-md text-label-md text-on-surface">Secure &amp; Private</h3>
-                  <p className="font-label-sm text-label-sm text-on-surface-variant">Your data is encrypted and anonymized.</p>
-                </div>
+        {/* Dynamic Features Bento Grid */}
+        <section className="py-16 md:py-24 bg-surface-container-low">
+          <div className="container mx-auto px-margin-mobile md:px-margin-desktop max-w-6xl">
+            <div className="flex flex-col md:flex-row justify-between items-end mb-10 gap-4">
+              <div>
+                <h2 className="font-headline-lg text-2xl sm:text-4xl font-bold text-on-surface mb-2">Comprehensive Mental Tools</h2>
+                <p className="text-on-surface-variant text-sm">Explore our suite of evidence-based wellness features.</p>
               </div>
-              <div className="flex items-center gap-4 p-6 bg-surface rounded-2xl border border-outline-variant/10">
-                <div className="w-12 h-12 rounded-full bg-primary-fixed flex items-center justify-center text-on-primary-fixed-variant">
-                  <span className="material-symbols-outlined">verified</span>
+              <input
+                type="text"
+                placeholder="Filter tools..."
+                value={featureSearch}
+                onChange={(e) => setFeatureSearch(e.target.value)}
+                className="px-4 py-2 rounded-full bg-surface text-xs border border-outline-variant/30 focus:outline-none focus:ring-2 focus:ring-primary/20 w-full md:w-64"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {filteredFeatures.map((feat) => (
+                <div key={feat.title} className="p-6 bg-surface-container-lowest rounded-3xl border border-outline-variant/20 shadow-sm space-y-3 hover:shadow-md transition">
+                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${feat.color}`}>
+                    <span className="material-symbols-outlined text-2xl">{feat.icon}</span>
+                  </div>
+                  <h3 className="font-bold text-on-surface text-base">{feat.title}</h3>
+                  <p className="text-xs text-on-surface-variant leading-relaxed">{feat.desc}</p>
                 </div>
-                <div>
-                  <h3 className="font-label-md text-label-md text-on-surface">Evidence-Based</h3>
-                  <p className="font-label-sm text-label-sm text-on-surface-variant">Built on CBT and mindfulness principles.</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-4 p-6 bg-surface rounded-2xl border border-outline-variant/10">
-                <div className="w-12 h-12 rounded-full bg-tertiary-fixed flex items-center justify-center text-on-tertiary-fixed-variant">
-                  <span className="material-symbols-outlined">schedule</span>
-                </div>
-                <div>
-                  <h3 className="font-label-md text-label-md text-on-surface">Available Anytime</h3>
-                  <p className="font-label-sm text-label-sm text-on-surface-variant">Support is ready 24/7, whenever you need.</p>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* How It Works */}
-        <section className="py-xl md:py-32 bg-background">
-          <div className="container mx-auto px-margin-mobile md:px-margin-desktop">
-            <div className="text-center mb-16">
-              <h2 className="font-headline-lg text-headline-lg text-on-surface mb-4">How MindEase Works</h2>
-              <p className="font-body-md text-body-md text-on-surface-variant w-full mx-auto ">Three simple steps to start your journey toward a calmer mind.</p>
+        {/* Dynamic Interactive Pricing Section */}
+        <section className="py-16 md:py-24 bg-background">
+          <div className="container mx-auto px-margin-mobile md:px-margin-desktop max-w-4xl text-center space-y-8">
+            <div>
+              <h2 className="font-headline-lg text-3xl font-bold text-on-surface mb-2">Simple, Transparent Plans</h2>
+              <p className="text-on-surface-variant text-sm">Free tier forever available for basic support.</p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-              <div className="relative flex flex-col items-center text-center">
-                <div className="w-20 h-20 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container mb-6 shadow-md">
-                  <span className="material-symbols-outlined text-3xl">edit_note</span>
-                </div>
-                <h4 className="font-headline-md text-headline-md text-on-surface mb-3">Share Your Thoughts</h4>
-                <p className="font-body-md text-body-md text-on-surface-variant">Type out what's on your mind in our safe, judgement-free chat environment.</p>
-                <div className="hidden md:block absolute top-10 -right-6 w-12 h-[2px] bg-outline-variant/30"></div>
-              </div>
-              <div className="relative flex flex-col items-center text-center">
-                <div className="w-20 h-20 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container mb-6 shadow-md">
-                  <span className="material-symbols-outlined text-3xl">psychology</span>
-                </div>
-                <h4 className="font-headline-md text-headline-md text-on-surface mb-3">AI Understands</h4>
-                <p className="font-body-md text-body-md text-on-surface-variant">Our empathetic AI analyzes your mood and identifies emotional patterns.</p>
-                <div className="hidden md:block absolute top-10 -right-6 w-12 h-[2px] bg-outline-variant/30"></div>
-              </div>
-              <div className="flex flex-col items-center text-center">
-                <div className="w-20 h-20 rounded-full bg-tertiary-fixed flex items-center justify-center text-on-tertiary-fixed-variant mb-6 shadow-md">
-                  <span className="material-symbols-outlined text-3xl">volunteer_activism</span>
-                </div>
-                <h4 className="font-headline-md text-headline-md text-on-surface mb-3">Receive Support</h4>
-                <p className="font-body-md text-body-md text-on-surface-variant">Get personalized exercises, reflections, and actionable advice instantly.</p>
-              </div>
-            </div>
-          </div>
-        </section>
 
-        {/* Features Bento Grid */}
-        <section className="py-xl md:py-32 bg-surface-container-low">
-          <div className="container mx-auto px-margin-mobile md:px-margin-desktop">
-            <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
-              <div className="max-w-2xl">
-                <h2 className="font-headline-lg text-headline-lg text-on-surface mb-4">Comprehensive Tools for Your Mind</h2>
-                <p className="font-body-md text-body-md text-on-surface-variant">Discover our science-backed features designed to nurture your mental well-being every day.</p>
-              </div>
-              <button className="text-primary font-label-md text-label-md flex items-center gap-1 hover:gap-2 transition-all">
-                View all features <span className="material-symbols-outlined">arrow_forward</span>
+            {/* Monthly / Yearly Toggle */}
+            <div className="inline-flex items-center p-1 bg-surface-container-low rounded-full border border-outline-variant/20">
+              <button
+                onClick={() => setBillingCycle('monthly')}
+                className={`px-6 py-2 rounded-full text-xs font-bold transition ${billingCycle === 'monthly' ? 'bg-primary text-white shadow' : 'text-on-surface-variant'}`}
+              >
+                Monthly Billing
+              </button>
+              <button
+                onClick={() => setBillingCycle('yearly')}
+                className={`px-6 py-2 rounded-full text-xs font-bold transition ${billingCycle === 'yearly' ? 'bg-primary text-white shadow' : 'text-on-surface-variant'}`}
+              >
+                Yearly Billing (Save 25%)
               </button>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-6 grid-rows-auto gap-gutter">
-              <div className="md:col-span-3 p-8 bg-surface rounded-[2rem] border border-outline-variant/10 shadow-sm hover:shadow-md transition-shadow group">
-                <div className="w-12 h-12 rounded-xl bg-error-container text-on-error-container flex items-center justify-center mb-6">
-                  <span className="material-symbols-outlined">monitor_heart</span>
-                </div>
-                <h3 className="font-headline-md text-headline-md text-on-surface mb-3">Stress Detection</h3>
-                <p className="font-body-md text-body-md text-on-surface-variant">Automatic analysis of language patterns to detect rising stress levels before they become overwhelming.</p>
-              </div>
-              <div className="md:col-span-3 p-8 bg-surface rounded-[2rem] border border-outline-variant/10 shadow-sm hover:shadow-md transition-shadow">
-                <div className="w-12 h-12 rounded-xl bg-primary-fixed text-on-primary-fixed-variant flex items-center justify-center mb-6">
-                  <span className="material-symbols-outlined">spa</span>
-                </div>
-                <h3 className="font-headline-md text-headline-md text-on-surface mb-3">Anxiety Support</h3>
-                <p className="font-body-md text-body-md text-on-surface-variant">Real-time grounding techniques and anxiety-reduction protocols during periods of high distress.</p>
-              </div>
-              <div className="md:col-span-2 p-8 bg-surface rounded-[2rem] border border-outline-variant/10 shadow-sm hover:shadow-md transition-shadow">
-                <div className="w-12 h-12 rounded-xl bg-secondary-container text-on-secondary-container flex items-center justify-center mb-6">
-                  <span className="material-symbols-outlined">air</span>
-                </div>
-                <h3 className="font-headline-md text-headline-md text-on-surface mb-3">Breathing</h3>
-                <p className="font-body-md text-body-md text-on-surface-variant">Guided rhythmic breathing exercises to activate your body's relaxation response.</p>
-              </div>
-              <div className="md:col-span-2 p-8 bg-surface rounded-[2rem] border border-outline-variant/10 shadow-sm hover:shadow-md transition-shadow">
-                <div className="w-12 h-12 rounded-xl bg-tertiary-fixed text-on-tertiary-fixed-variant flex items-center justify-center mb-6">
-                  <span className="material-symbols-outlined">self_improvement</span>
-                </div>
-                <h3 className="font-headline-md text-headline-md text-on-surface mb-3">Mindfulness</h3>
-                <p className="font-body-md text-body-md text-on-surface-variant">Short, accessible meditation sessions for focus and mental presence.</p>
-              </div>
-              <div className="md:col-span-2 p-8 bg-surface rounded-[2rem] border border-outline-variant/10 shadow-sm hover:shadow-md transition-shadow">
-                <div className="w-12 h-12 rounded-xl bg-surface-container-high text-on-primary-fixed-variant flex items-center justify-center mb-6">
-                  <span className="material-symbols-outlined">history_edu</span>
-                </div>
-                <h3 className="font-headline-md text-headline-md text-on-surface mb-3">CBT Reflection</h3>
-                <p className="font-body-md text-body-md text-on-surface-variant">Structured Cognitive Behavioral Therapy tools for reframing negative thought patterns.</p>
-              </div>
-            </div>
-          </div>
-        </section>
 
-        {/* Stats Section */}
-        <section className="py-xl bg-primary text-on-primary">
-          <div className="container mx-auto px-margin-mobile md:px-margin-desktop grid grid-cols-2 md:grid-cols-4 gap-12 text-center">
-            <div>
-              <p className="font-headline-xl text-headline-xl mb-1">500k+</p>
-              <p className="font-label-md text-label-md opacity-80 uppercase tracking-wider">Users Supported</p>
-            </div>
-            <div>
-              <p className="font-headline-xl text-headline-xl mb-1">12M+</p>
-              <p className="font-label-md text-label-md opacity-80 uppercase tracking-wider">Sessions Completed</p>
-            </div>
-            <div>
-              <p className="font-headline-xl text-headline-xl mb-1">4.9/5</p>
-              <p className="font-label-md text-label-md opacity-80 uppercase tracking-wider">User Rating</p>
-            </div>
-            <div>
-              <p className="font-headline-xl text-headline-xl mb-1">24/7</p>
-              <p className="font-label-md text-label-md opacity-80 uppercase tracking-wider">Active Support</p>
-            </div>
-          </div>
-        </section>
-
-        {/* FAQ Section */}
-        <section className="py-xl md:py-32 bg-background">
-          <div className="container mx-auto px-margin-mobile md:px-margin-desktop max-w-3xl">
-            <div className="text-center mb-16">
-              <h2 className="font-headline-lg text-headline-lg text-on-surface mb-4">Frequently Asked Questions</h2>
-              <p className="font-body-md text-body-md text-on-surface-variant">Have questions? We have answers.</p>
-            </div>
-            <div className="space-y-4">
-              <details className="group bg-surface rounded-2xl border border-outline-variant/20 p-6 open:shadow-md transition-all">
-                <summary className="flex justify-between items-center cursor-pointer list-none">
-                  <span className="font-label-md text-label-md text-on-surface">Is MindEase a replacement for therapy?</span>
-                  <span className="material-symbols-outlined transition-transform group-open:rotate-180">expand_more</span>
-                </summary>
-                <div className="mt-4 font-body-md text-body-md text-on-surface-variant">
-                  No, MindEase is designed to complement professional care, not replace it. It provides immediate support and habit tracking, but for clinical conditions, we recommend consulting a licensed therapist.
-                </div>
-              </details>
-              <details className="group bg-surface rounded-2xl border border-outline-variant/20 p-6 open:shadow-md transition-all">
-                <summary className="flex justify-between items-center cursor-pointer list-none">
-                  <span className="font-label-md text-label-md text-on-surface">How secure is my personal data?</span>
-                  <span className="material-symbols-outlined transition-transform group-open:rotate-180">expand_more</span>
-                </summary>
-                <div className="mt-4 font-body-md text-body-md text-on-surface-variant">
-                  Your privacy is our priority. All conversations are end-to-end encrypted, and we never sell your data to third parties. We are fully HIPAA and GDPR compliant.
-                </div>
-              </details>
-              <details className="group bg-surface rounded-2xl border border-outline-variant/20 p-6 open:shadow-md transition-all">
-                <summary className="flex justify-between items-center cursor-pointer list-none">
-                  <span className="font-label-md text-label-md text-on-surface">What makes the AI "empathetic"?</span>
-                  <span className="material-symbols-outlined transition-transform group-open:rotate-180">expand_more</span>
-                </summary>
-                <div className="mt-4 font-body-md text-body-md text-on-surface-variant">
-                  Our AI models are trained on millions of therapeutic interactions and supervised by psychologists to ensure the tone is supportive, validating, and ethically sound.
-                </div>
-              </details>
-            </div>
-          </div>
-        </section>
-
-        {/* CTA Section */}
-        <section className="py-xl mb-xl">
-          <div className="container mx-auto px-margin-mobile md:px-margin-desktop">
-            <div className="bg-primary-container text-on-primary-container rounded-[3rem] p-12 md:p-20 text-center relative overflow-hidden">
-              <div className="relative z-10">
-                <h2 className="font-headline-xl-mobile md:font-headline-xl text-headline-xl-mobile md:text-headline-xl mb-6">Ready to find your peace?</h2>
-                <p className="font-body-lg text-body-lg mb-10 opacity-90 max-w-2xl mx-auto">Join thousands of others who are managing their stress and building emotional resilience with MindEase.</p>
-                <Link to="/signup" className="inline-block bg-surface text-primary px-10 py-5 rounded-full font-label-md text-label-md hover:opacity-95 active:scale-95 transition-all shadow-xl">
-                  Start Your Free Trial
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+              <div className="p-8 bg-surface-container-lowest rounded-3xl border border-outline-variant/20 shadow-sm space-y-4">
+                <h3 className="font-bold text-on-surface text-xl">Free Companion</h3>
+                <p className="text-3xl font-bold text-primary">$0 <span className="text-xs font-normal text-on-surface-variant">/ month</span></p>
+                <ul className="space-y-2 text-xs text-on-surface-variant">
+                  <li className="flex items-center gap-2">✓ 24/7 AI Chat Assistant</li>
+                  <li className="flex items-center gap-2">✓ Daily Mood &amp; Streak Tracker</li>
+                  <li className="flex items-center gap-2">✓ Community Forum Access</li>
+                  <li className="flex items-center gap-2">✓ Basic 4-7-8 Breathing Tools</li>
+                </ul>
+                <Link to="/signup" className="block w-full py-3 bg-primary/10 text-primary text-center font-bold text-xs rounded-full hover:bg-primary hover:text-white transition">
+                  Get Started Free
                 </Link>
               </div>
-              <div className="absolute -top-24 -left-24 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
-              <div className="absolute -bottom-24 -right-24 w-80 h-80 bg-secondary-container/20 rounded-full blur-3xl"></div>
+
+              <div className="p-8 bg-primary text-white rounded-3xl shadow-xl space-y-4 relative overflow-hidden">
+                <span className="absolute top-4 right-4 bg-white/20 text-white px-3 py-1 rounded-full text-[10px] font-bold">RECOMMENDED</span>
+                <h3 className="font-bold text-xl">MindEase Pro</h3>
+                <p className="text-3xl font-bold">{billingCycle === 'monthly' ? '$9.99' : '$7.49'} <span className="text-xs font-normal opacity-80">/ month</span></p>
+                <ul className="space-y-2 text-xs opacity-90">
+                  <li className="flex items-center gap-2">✓ Everything in Free</li>
+                  <li className="flex items-center gap-2">✓ Unlimited Video Guided Sessions</li>
+                  <li className="flex items-center gap-2">✓ Complete CBT Wellness Programs</li>
+                  <li className="flex items-center gap-2">✓ Priority Specialist Support</li>
+                </ul>
+                <Link to="/signup" className="block w-full py-3 bg-white text-primary text-center font-bold text-xs rounded-full hover:bg-surface-bright transition shadow">
+                  Start Pro Trial
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Dynamic Testimonials */}
+        <section className="py-16 bg-surface-container-low">
+          <div className="container mx-auto px-margin-mobile md:px-margin-desktop max-w-4xl text-center space-y-8">
+            <h2 className="font-headline-lg text-2xl font-bold text-on-surface">Trusted by Thousands</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+              {testimonials.map((t) => (
+                <div key={t.id} className="p-6 bg-surface-container-lowest rounded-3xl border border-outline-variant/20 shadow-sm space-y-3">
+                  <p className="text-xs text-on-surface-variant italic leading-relaxed">"{t.comment}"</p>
+                  <div className="flex items-center gap-3 pt-2">
+                    <img src={t.avatar} alt={t.name} className="w-10 h-10 rounded-full object-cover border" />
+                    <div>
+                      <h4 className="font-bold text-on-surface text-xs">{t.name}</h4>
+                      <p className="text-[10px] text-outline">{t.role}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Dynamic FAQ */}
+        <section className="py-16 md:py-24 bg-background">
+          <div className="container mx-auto px-margin-mobile md:px-margin-desktop max-w-3xl space-y-6">
+            <h2 className="font-headline-lg text-2xl font-bold text-on-surface text-center mb-6">Frequently Asked Questions</h2>
+            <div className="space-y-3">
+              {faqs.map((faq) => (
+                <details key={faq.id} className="group bg-surface-container-lowest rounded-2xl border border-outline-variant/20 p-5 open:shadow-sm">
+                  <summary className="font-bold text-on-surface text-sm cursor-pointer list-none flex justify-between items-center">
+                    <span>{faq.question}</span>
+                    <span className="material-symbols-outlined text-outline group-open:rotate-180 transition">expand_more</span>
+                  </summary>
+                  <p className="text-xs text-on-surface-variant mt-3 leading-relaxed border-t border-outline-variant/10 pt-2">
+                    {faq.answer}
+                  </p>
+                </details>
+              ))}
             </div>
           </div>
         </section>
       </main>
 
-      {/* Footer */}
       <Footer />
     </div>
   );

@@ -1,10 +1,50 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Footer from '../components/Footer';
 import { useLayout } from '../components/Layout';
+import { useData } from '../context/DataContext';
+
+const tags = ['All Topics', 'Anxiety', 'Sleep', 'Mindfulness', 'General'];
 
 function Community() {
   const { toggleMobileMenu } = useLayout();
+  const { communityPosts, createCommunityPost, toggleLikePost, addCommentToPost, profile } = useData();
+
+  const [activeTag, setActiveTag] = useState('All Topics');
+  const [searchQuery, setSearchQuery] = useState('');
+  
+  // New post modal state
+  const [showPostModal, setShowPostModal] = useState(false);
+  const [newTitle, setNewTitle] = useState('');
+  const [newContent, setNewContent] = useState('');
+  const [newTag, setNewTag] = useState('Anxiety');
+
+  // Comment input state per post
+  const [activeCommentPostId, setActiveCommentPostId] = useState(null);
+  const [commentText, setCommentText] = useState('');
+
+  const filteredPosts = communityPosts.filter((post) => {
+    const matchesTag = activeTag === 'All Topics' || post.tag.toLowerCase() === activeTag.toLowerCase();
+    const matchesSearch = searchQuery === '' ||
+      post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      post.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      post.author.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesTag && matchesSearch;
+  });
+
+  const handleCreatePost = (e) => {
+    e.preventDefault();
+    if (!newTitle.trim() || !newContent.trim()) return;
+    createCommunityPost({ title: newTitle, content: newContent, tag: newTag });
+    setNewTitle('');
+    setNewContent('');
+    setShowPostModal(false);
+  };
+
+  const handleAddComment = (postId) => {
+    addCommentToPost(postId, commentText);
+    setCommentText('');
+  };
 
   return (
     <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
@@ -23,9 +63,9 @@ function Community() {
             <Link to="/community" className="text-primary font-bold border-b-2 border-primary pb-1 font-body-md text-body-md">Community</Link>
           </div>
           <div className="flex items-center gap-3">
-            <span className="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center overflow-hidden">
-              <img className="w-full h-full object-cover" data-alt="A close-up portrait of a serene woman with closed eyes and a soft smile, set against a blurred background of a tranquil, sun-drenched botanical garden. The lighting is ethereal and high-key, emphasizing a light-mode aesthetic with soft highlights and a peaceful, clinical but warm atmosphere. The image is crisp, modern, and professional, reflecting a high-end SaaS profile aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCOyFxZRyLPOzv7JOnhXbvm4XHM7OXMP7dPkU0SyIT635aHySENY1gd4odPJo-nreYAZsKdZV-rr_it0dLFQ0qF8AQFEAoQMXiP4QWWeLbOyeG5-0aNFSH0WW177X5dYK_D67BG7cd3h9wj5WKinG45QFQlG_sC5F8GcDNBDXLqQDbP_BO0kPifU4BcsWAvbeB43QItvGZO-2fvDGBbpRSI6UmVRlYLdv8s6oXnhl5zSjEUtce6VugYE5K2DHq5eVlPhnvH5JRJ3hkQ" alt="User Profile" />
-            </span>
+            <Link to="/profile" className="w-10 h-10 rounded-full overflow-hidden border-2 border-primary/20 hover:scale-105 transition">
+              <img className="w-full h-full object-cover" src={profile.avatar} alt={profile.name} />
+            </Link>
           </div>
         </div>
       </header>
@@ -33,196 +73,215 @@ function Community() {
       {/* Page Scrollable Area */}
       <div className="flex-1 overflow-y-auto min-h-0 flex flex-col">
         <div className="max-w-[1200px] w-full mx-auto px-margin-mobile md:px-margin-desktop py-lg space-y-xl flex-grow">
-        {/* Welcome Section */}
-        <section className="bg-primary-container text-on-primary-container rounded-[2rem] p-8 md:p-12 relative overflow-hidden">
-          <div className="relative z-10 max-w-2xl">
-            <h2 className="font-headline-lg text-headline-lg mb-4">You are not alone.</h2>
-            <p className="font-body-lg text-body-lg mb-8 opacity-90">Join safe, professionally moderated groups to share experiences, learn coping strategies, and find solidarity with peers who understand what you're going through.</p>
-            <div className="flex gap-4">
-              <button className="bg-primary text-on-primary px-6 py-3 rounded-full font-label-md text-label-md font-bold shadow-sm hover:opacity-95 transition-all">Browse Groups</button>
-              <button className="bg-surface/50 text-on-primary-container px-6 py-3 rounded-full font-label-md text-label-md font-bold hover:bg-surface/80 transition-all backdrop-blur-md">Read Guidelines</button>
-            </div>
-          </div>
-          <div className="absolute top-0 right-0 w-1/2 h-full opacity-30 pointer-events-none hidden md:block">
-            <div className="absolute inset-0 bg-gradient-to-r from-primary-container to-transparent z-10"></div>
-            <img className="w-full h-full object-cover" data-alt="An abstract 3D render showing multiple translucent, soft-edged spheres gently interacting and floating together in a serene, bright space. The spheres are colored in soft primary blues, mint greens, and warm lavenders. The lighting is diffused, casting soft shadows, symbolizing connection, community, and gentle support within a modern wellness application." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDFqT9sE-C7V06c3u3D1B4r8i8R-N345fXFhXoQk2P3VqL8gXQ3HhRjLgHqfR24tXo4RkC_zQfR4Xk5x_C_jQhRj9G2-W8G24v7z8_j2h-QkP2_RkP2r4Xk4Xk_HhRjRkC_zQfR4v7z8w4HhRjC_zQfRj9G2_j2hQkP2W8G24r4Xk4_C_jQhRjRkP2v7z8W8G2-Rj9G2" alt="Community Support" />
-          </div>
-        </section>
-
-        {/* Forums / Groups Grid */}
-        <section className="space-y-6">
-          <div className="flex justify-between items-end">
-            <h3 className="font-headline-md text-headline-md text-on-surface">Active Support Groups</h3>
-            <div className="flex gap-2">
-              <button className="p-2 bg-surface-container-high rounded-lg text-on-surface-variant hover:text-primary transition-colors"><span className="material-symbols-outlined text-[20px]">tune</span></button>
-              <button className="p-2 bg-surface-container-high rounded-lg text-on-surface-variant hover:text-primary transition-colors"><span className="material-symbols-outlined text-[20px]">search</span></button>
-            </div>
-          </div>
           
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-gutter">
-            {/* Group Card 1 */}
-            <div className="bg-surface rounded-3xl p-6 border border-outline-variant/20 hover:border-primary/30 transition-all hover:shadow-md group flex flex-col md:flex-row gap-6">
-              <div className="w-full md:w-32 h-32 rounded-2xl bg-secondary-container flex items-center justify-center text-on-secondary-container shrink-0">
-                <span className="material-symbols-outlined text-5xl">work_history</span>
+          {/* Welcome & Create Post Hero Banner */}
+          <section className="bg-primary-container text-on-primary-container rounded-[2rem] p-8 md:p-12 relative overflow-hidden flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            <div className="relative z-10 max-w-2xl">
+              <h2 className="font-headline-lg text-headline-lg font-bold mb-3">You are not alone.</h2>
+              <p className="font-body-lg text-body-lg mb-6 opacity-90">
+                Connect in safe, moderated discussions with peers who understand what you are going through.
+              </p>
+              <button
+                onClick={() => setShowPostModal(true)}
+                className="bg-primary text-on-primary px-6 py-3 rounded-full font-label-md font-bold shadow-md hover:opacity-95 transition-all flex items-center gap-2"
+              >
+                <span className="material-symbols-outlined text-lg">edit</span>
+                <span>Start a Discussion</span>
+              </button>
+            </div>
+          </section>
+
+          {/* Search & Topic Filters */}
+          <section className="space-y-4">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="flex flex-wrap gap-2">
+                {tags.map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => setActiveTag(t)}
+                    className={`px-5 py-2 rounded-full text-xs font-bold transition-all ${
+                      activeTag === t
+                        ? 'bg-primary text-white shadow'
+                        : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest'
+                    }`}
+                  >
+                    {t}
+                  </button>
+                ))}
               </div>
-              <div className="flex-1 flex flex-col justify-between">
-                <div>
-                  <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-headline-sm text-headline-sm text-on-surface font-bold group-hover:text-primary transition-colors">Workplace Burnout</h4>
-                    <span className="px-2 py-1 bg-surface-container-high text-on-surface-variant rounded text-[11px] font-bold tracking-wider">MODERATED</span>
-                  </div>
-                  <p className="font-body-md text-body-md text-on-surface-variant line-clamp-2 mb-4">Navigating stress, setting boundaries, and recovering from chronic occupational exhaustion.</p>
-                </div>
-                <div className="flex justify-between items-center border-t border-outline-variant/10 pt-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex -space-x-2">
-                      <div className="w-8 h-8 rounded-full bg-surface-variant border-2 border-surface"></div>
-                      <div className="w-8 h-8 rounded-full bg-surface-variant border-2 border-surface"></div>
-                      <div className="w-8 h-8 rounded-full bg-surface-variant border-2 border-surface"></div>
-                    </div>
-                    <span className="text-[12px] text-on-surface-variant font-medium">1.2k Members</span>
-                  </div>
-                  <button className="text-primary font-label-md text-label-md font-bold hover:bg-primary/5 px-4 py-2 rounded-lg transition-colors">Join Group</button>
-                </div>
+
+              <div className="relative w-full md:w-72">
+                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-sm">search</span>
+                <input
+                  type="text"
+                  placeholder="Search discussions..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2 rounded-full bg-surface-container-low text-xs border border-outline-variant/20 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
               </div>
             </div>
 
-            {/* Group Card 2 */}
-            <div className="bg-surface rounded-3xl p-6 border border-outline-variant/20 hover:border-primary/30 transition-all hover:shadow-md group flex flex-col md:flex-row gap-6">
-              <div className="w-full md:w-32 h-32 rounded-2xl bg-primary-container flex items-center justify-center text-on-primary-container shrink-0">
-                <span className="material-symbols-outlined text-5xl">air</span>
-              </div>
-              <div className="flex-1 flex flex-col justify-between">
-                <div>
-                  <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-headline-sm text-headline-sm text-on-surface font-bold group-hover:text-primary transition-colors">Living with Anxiety</h4>
-                    <span className="px-2 py-1 bg-surface-container-high text-on-surface-variant rounded text-[11px] font-bold tracking-wider">MODERATED</span>
-                  </div>
-                  <p className="font-body-md text-body-md text-on-surface-variant line-clamp-2 mb-4">Share coping mechanisms, grounding techniques, and daily victories against anxiety.</p>
-                </div>
-                <div className="flex justify-between items-center border-t border-outline-variant/10 pt-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex -space-x-2">
-                      <div className="w-8 h-8 rounded-full bg-surface-variant border-2 border-surface"></div>
-                      <div className="w-8 h-8 rounded-full bg-surface-variant border-2 border-surface"></div>
-                      <div className="w-8 h-8 rounded-full bg-surface-variant border-2 border-surface"></div>
+            {/* Dynamic Discussions Feed */}
+            <div className="space-y-6">
+              {filteredPosts.map((post) => (
+                <div key={post.id} className="bg-surface-container-lowest rounded-3xl p-6 border border-outline-variant/20 shadow-sm space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <img src={post.avatar} alt={post.author} className="w-10 h-10 rounded-full object-cover border" />
+                      <div>
+                        <h4 className="font-bold text-on-surface text-sm">{post.author}</h4>
+                        <span className="text-xs text-outline">{post.time}</span>
+                      </div>
                     </div>
-                    <span className="text-[12px] text-on-surface-variant font-medium">3.4k Members</span>
+                    <span className="px-3 py-1 bg-secondary-container/30 text-secondary font-bold text-xs rounded-full">
+                      {post.tag}
+                    </span>
                   </div>
-                  <button className="text-primary font-label-md text-label-md font-bold hover:bg-primary/5 px-4 py-2 rounded-lg transition-colors">Join Group</button>
-                </div>
-              </div>
-            </div>
 
-            {/* Group Card 3 */}
-            <div className="bg-surface rounded-3xl p-6 border border-outline-variant/20 hover:border-primary/30 transition-all hover:shadow-md group flex flex-col md:flex-row gap-6">
-              <div className="w-full md:w-32 h-32 rounded-2xl bg-tertiary-container flex items-center justify-center text-on-tertiary-container shrink-0">
-                <span className="material-symbols-outlined text-5xl">family_restroom</span>
-              </div>
-              <div className="flex-1 flex flex-col justify-between">
-                <div>
-                  <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-headline-sm text-headline-sm text-on-surface font-bold group-hover:text-primary transition-colors">Parenting &amp; Stress</h4>
-                    <span className="px-2 py-1 bg-surface-container-high text-on-surface-variant rounded text-[11px] font-bold tracking-wider">MODERATED</span>
+                  <div>
+                    <h3 className="font-headline-sm text-lg font-bold text-on-surface mb-2">{post.title}</h3>
+                    <p className="text-on-surface-variant text-sm leading-relaxed">{post.content}</p>
                   </div>
-                  <p className="font-body-md text-body-md text-on-surface-variant line-clamp-2 mb-4">Balancing caregiving responsibilities while maintaining your own mental health.</p>
-                </div>
-                <div className="flex justify-between items-center border-t border-outline-variant/10 pt-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex -space-x-2">
-                      <div className="w-8 h-8 rounded-full bg-surface-variant border-2 border-surface"></div>
-                      <div className="w-8 h-8 rounded-full bg-surface-variant border-2 border-surface"></div>
+
+                  {/* Actions & Comment Count */}
+                  <div className="flex items-center justify-between border-t border-outline-variant/10 pt-4 text-xs font-semibold text-on-surface-variant">
+                    <button
+                      onClick={() => toggleLikePost(post.id)}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition ${
+                        post.isLiked ? 'bg-rose-500/10 text-rose-600 font-bold' : 'hover:bg-surface-container-high'
+                      }`}
+                    >
+                      <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: post.isLiked ? "'FILL' 1" : "'FILL' 0" }}>
+                        favorite
+                      </span>
+                      <span>{post.likes} Likes</span>
+                    </button>
+
+                    <button
+                      onClick={() => setActiveCommentPostId(activeCommentPostId === post.id ? null : post.id)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full hover:bg-surface-container-high transition"
+                    >
+                      <span className="material-symbols-outlined text-base">chat_bubble_outline</span>
+                      <span>{post.comments.length} Comments</span>
+                    </button>
+                  </div>
+
+                  {/* Comments Thread */}
+                  {activeCommentPostId === post.id && (
+                    <div className="pt-3 border-t border-outline-variant/10 space-y-3 bg-surface-container-low/50 p-4 rounded-2xl">
+                      {post.comments.map((c) => (
+                        <div key={c.id} className="flex gap-3 text-xs">
+                          <img src={c.avatar} alt={c.author} className="w-7 h-7 rounded-full object-cover" />
+                          <div className="flex-1 bg-surface-container-lowest p-3 rounded-xl border border-outline-variant/10">
+                            <div className="flex justify-between items-center mb-1">
+                              <span className="font-bold text-on-surface">{c.author}</span>
+                              <span className="text-[10px] text-outline">{c.time}</span>
+                            </div>
+                            <p className="text-on-surface-variant">{c.text}</p>
+                          </div>
+                        </div>
+                      ))}
+
+                      {/* Add Comment Input */}
+                      <div className="flex gap-2 pt-2">
+                        <input
+                          type="text"
+                          placeholder="Write a supportive comment..."
+                          value={commentText}
+                          onChange={(e) => setCommentText(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && handleAddComment(post.id)}
+                          className="flex-1 px-4 py-2 rounded-full text-xs bg-surface-container-lowest border border-outline-variant/20 focus:outline-none focus:ring-1 focus:ring-primary"
+                        />
+                        <button
+                          onClick={() => handleAddComment(post.id)}
+                          className="px-4 py-2 bg-primary text-white rounded-full text-xs font-bold hover:opacity-90 transition"
+                        >
+                          Post
+                        </button>
+                      </div>
                     </div>
-                    <span className="text-[12px] text-on-surface-variant font-medium">850 Members</span>
-                  </div>
-                  <button className="text-primary font-label-md text-label-md font-bold hover:bg-primary/5 px-4 py-2 rounded-lg transition-colors">Join Group</button>
-                </div>
-              </div>
-            </div>
-            
-            {/* Group Card 4 */}
-            <div className="bg-surface rounded-3xl p-6 border border-outline-variant/20 hover:border-primary/30 transition-all hover:shadow-md group flex flex-col md:flex-row gap-6">
-              <div className="w-full md:w-32 h-32 rounded-2xl bg-surface-container-highest flex items-center justify-center text-on-surface-variant shrink-0">
-                <span className="material-symbols-outlined text-5xl">bedtime</span>
-              </div>
-              <div className="flex-1 flex flex-col justify-between">
-                <div>
-                  <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-headline-sm text-headline-sm text-on-surface font-bold group-hover:text-primary transition-colors">Sleep Hygiene</h4>
-                    <span className="px-2 py-1 bg-surface-container-high text-on-surface-variant rounded text-[11px] font-bold tracking-wider">MODERATED</span>
-                  </div>
-                  <p className="font-body-md text-body-md text-on-surface-variant line-clamp-2 mb-4">Tips, routines, and support for overcoming insomnia and improving sleep quality.</p>
-                </div>
-                <div className="flex justify-between items-center border-t border-outline-variant/10 pt-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex -space-x-2">
-                      <div className="w-8 h-8 rounded-full bg-surface-variant border-2 border-surface"></div>
-                      <div className="w-8 h-8 rounded-full bg-surface-variant border-2 border-surface"></div>
-                      <div className="w-8 h-8 rounded-full bg-surface-variant border-2 border-surface"></div>
-                    </div>
-                    <span className="text-[12px] text-on-surface-variant font-medium">2.1k Members</span>
-                  </div>
-                  <button className="text-primary font-label-md text-label-md font-bold hover:bg-primary/5 px-4 py-2 rounded-lg transition-colors">Join Group</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+                  )}
 
-        {/* Live Events / Webinars */}
-        <section className="space-y-6">
-          <h3 className="font-headline-md text-headline-md text-on-surface">Upcoming Live Events</h3>
-          <div className="flex overflow-x-auto gap-6 pb-4 hide-scrollbar snap-x">
-            {/* Event 1 */}
-            <div className="min-w-[300px] max-w-[320px] bg-surface-container-lowest rounded-3xl p-6 border border-outline-variant/20 snap-start flex-shrink-0 relative">
-              <div className="absolute top-4 right-4 w-3 h-3 bg-error rounded-full animate-pulse shadow-[0_0_8px_rgba(186,26,26,0.6)]"></div>
-              <div className="text-primary font-label-sm text-label-sm font-bold uppercase tracking-wider mb-2">Happening Now</div>
-              <h4 className="font-headline-sm text-headline-sm font-bold mb-2 text-on-surface">Guided Meditation: Midday Reset</h4>
-              <p className="text-body-md text-on-surface-variant mb-6 line-clamp-2">A 15-minute live guided session to center your focus and release morning tension.</p>
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-full bg-surface-variant"></div>
-                <div className="text-sm">
-                  <p className="font-bold text-on-surface">Dr. Elena Rostova</p>
-                  <p className="text-on-surface-variant text-[12px]">Clinical Psychologist</p>
                 </div>
-              </div>
-              <button className="w-full bg-primary text-white py-3 rounded-xl font-bold hover:bg-on-primary-fixed-variant transition-colors">Join Livestream</button>
+              ))}
             </div>
+          </section>
 
-            {/* Event 2 */}
-            <div className="min-w-[300px] max-w-[320px] bg-surface rounded-3xl p-6 border border-outline-variant/20 snap-start flex-shrink-0 opacity-80">
-              <div className="text-on-surface-variant font-label-sm text-label-sm font-bold uppercase tracking-wider mb-2">Tomorrow • 6:00 PM EST</div>
-              <h4 className="font-headline-sm text-headline-sm font-bold mb-2 text-on-surface">Q&amp;A: Managing Social Anxiety</h4>
-              <p className="text-body-md text-on-surface-variant mb-6 line-clamp-2">Open forum discussing techniques to navigate social situations with greater ease.</p>
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-full bg-surface-variant"></div>
-                <div className="text-sm">
-                  <p className="font-bold text-on-surface">Mark Johnson, LCSW</p>
-                  <p className="text-on-surface-variant text-[12px]">Therapist</p>
-                </div>
-              </div>
-              <button className="w-full bg-surface-container-high text-on-surface-variant py-3 rounded-xl font-bold hover:bg-surface-container-highest transition-colors">Set Reminder</button>
-            </div>
-            
-            {/* Event 3 */}
-            <div className="min-w-[300px] max-w-[320px] bg-surface rounded-3xl p-6 border border-outline-variant/20 snap-start flex-shrink-0 opacity-80">
-              <div className="text-on-surface-variant font-label-sm text-label-sm font-bold uppercase tracking-wider mb-2">Friday • 12:00 PM EST</div>
-              <h4 className="font-headline-sm text-headline-sm font-bold mb-2 text-on-surface">Workshop: Sleep Hygiene</h4>
-              <p className="text-body-md text-on-surface-variant mb-6 line-clamp-2">Learn the physiological components of sleep and how to optimize your environment.</p>
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-full bg-surface-variant"></div>
-                <div className="text-sm">
-                  <p className="font-bold text-on-surface">Dr. Sarah Lin</p>
-                  <p className="text-on-surface-variant text-[12px]">Somnologist</p>
-                </div>
-              </div>
-              <button className="w-full bg-surface-container-high text-on-surface-variant py-3 rounded-xl font-bold hover:bg-surface-container-highest transition-colors">Set Reminder</button>
-            </div>
-          </div>
-        </section>
         </div>
         <Footer />
       </div>
+
+      {/* Create Discussion Modal */}
+      {showPostModal && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-surface-container-lowest max-w-lg w-full rounded-3xl p-6 shadow-2xl space-y-4">
+            <div className="flex justify-between items-center">
+              <h3 className="font-headline-md font-bold text-on-surface text-lg">Create Community Discussion</h3>
+              <button onClick={() => setShowPostModal(false)} className="p-1 text-on-surface-variant hover:text-primary">
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+
+            <form onSubmit={handleCreatePost} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-on-surface-variant mb-1">Topic Tag</label>
+                <select
+                  value={newTag}
+                  onChange={(e) => setNewTag(e.target.value)}
+                  className="w-full p-2.5 rounded-xl bg-surface-container-low border border-outline-variant/20 text-xs font-semibold"
+                >
+                  <option value="Anxiety">Anxiety</option>
+                  <option value="Sleep">Sleep</option>
+                  <option value="Mindfulness">Mindfulness</option>
+                  <option value="Stress">Stress</option>
+                  <option value="General">General</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-on-surface-variant mb-1">Title</label>
+                <input
+                  type="text"
+                  placeholder="Summarize your experience or question..."
+                  value={newTitle}
+                  onChange={(e) => setNewTitle(e.target.value)}
+                  required
+                  className="w-full p-3 rounded-xl bg-surface-container-low border border-outline-variant/20 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-on-surface-variant mb-1">Content</label>
+                <textarea
+                  rows={4}
+                  placeholder="Share details in a respectful, supportive tone..."
+                  value={newContent}
+                  onChange={(e) => setNewContent(e.target.value)}
+                  required
+                  className="w-full p-3 rounded-xl bg-surface-container-low border border-outline-variant/20 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowPostModal(false)}
+                  className="px-5 py-2.5 rounded-full text-xs font-bold border hover:bg-surface-container-high"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2.5 rounded-full text-xs font-bold bg-primary text-white hover:opacity-90 shadow"
+                >
+                  Publish Discussion
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
