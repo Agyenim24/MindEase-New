@@ -4,12 +4,12 @@ import { useLayout } from '../components/Layout';
 
 const API_BASE = 'http://localhost:5000/api/chat';
 
-// Generate or retrieve a persistent session ID
+// Generate or retrieve a persistent session ID using localStorage
 function getSessionId() {
-  let id = sessionStorage.getItem('mindease_session_id');
+  let id = localStorage.getItem('mindease_session_id');
   if (!id) {
     id = crypto.randomUUID?.() || `sess_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
-    sessionStorage.setItem('mindease_session_id', id);
+    localStorage.setItem('mindease_session_id', id);
   }
   return id;
 }
@@ -51,6 +51,29 @@ function Chat() {
     setToastMsg(msg);
     setTimeout(() => setToastMsg(null), 3000);
   };
+
+  // ── Load chat history from backend on mount ────────────
+  useEffect(() => {
+    const loadHistory = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/history/${sessionId.current}`);
+        const data = await res.json();
+        if (data.messages && data.messages.length > 0) {
+          const loaded = data.messages.map((msg) => ({
+            id: msg._id,
+            role: msg.sender,
+            text: msg.content,
+            emotion: msg.emotion || null,
+          }));
+          setMessages(loaded);
+          setMoodSelected(true);
+        }
+      } catch (err) {
+        console.error('Failed to load chat history:', err);
+      }
+    };
+    loadHistory();
+  }, []);
 
   // ── Auto-scroll to bottom ──────────────────────────────
   const scrollToBottom = useCallback(() => {
@@ -176,6 +199,10 @@ function Chat() {
 
   // ── Action Handlers for More Menu ──────────────────────
   const handleClearChat = () => {
+    // Remove session ID so a new one is generated
+    localStorage.removeItem('mindease_session_id');
+    sessionId.current = getSessionId();
+
     setMessages([
       {
         id: 'welcome',
@@ -183,8 +210,9 @@ function Chat() {
         text: "Chat cleared! How can I support you right now?",
       },
     ]);
+    setMoodSelected(false);
     setShowMoreMenu(false);
-    showToast('Chat history cleared for current session.');
+    showToast('Chat history cleared.');
   };
 
   const handleExportChat = () => {
@@ -211,9 +239,8 @@ function Chat() {
   };
 
   const handleStartNewChat = () => {
-    const newId = `sess_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-    sessionStorage.setItem('mindease_session_id', newId);
-    sessionId.current = newId;
+    localStorage.removeItem('mindease_session_id');
+    sessionId.current = getSessionId();
 
     setMessages([
       {
@@ -222,6 +249,7 @@ function Chat() {
         text: "Started a fresh conversation session. What's on your mind?",
       },
     ]);
+    setMoodSelected(false);
     setShowHistory(false);
     showToast('Started new chat session!');
   };
