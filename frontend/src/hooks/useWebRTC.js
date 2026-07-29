@@ -34,7 +34,7 @@ export function useWebRTC({ socket, sessionId, onCallEnded }) {
     }
   }, []);
 
-  // ── Create peer connection ─────────────────────────────
+  // Create peer connection ─────────────────────────────
   const createPeerConnection = useCallback((volunteerId) => {
     const pc = new RTCPeerConnection(ICE_SERVERS);
 
@@ -67,7 +67,7 @@ export function useWebRTC({ socket, sessionId, onCallEnded }) {
     return pc;
   }, [socket]);
 
-  // ── Join queue ─────────────────────────────────────────
+  // Join queue 
   const joinQueue = useCallback(async () => {
     try {
       await startLocalStream();
@@ -81,7 +81,7 @@ export function useWebRTC({ socket, sessionId, onCallEnded }) {
     }
   }, [socket, sessionId, startLocalStream]);
 
-  // ── Handle incoming call offer from volunteer ──────────
+  // Handle incoming call offer from volunteer
   const handleCallOffer = useCallback(async (data) => {
     const pc = createPeerConnection(data.volunteer_id);
     await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
@@ -97,7 +97,7 @@ export function useWebRTC({ socket, sessionId, onCallEnded }) {
     }
   }, [socket, sessionId, createPeerConnection]);
 
-  // ──Handle ICE candidate ───────────────────────────────
+  // Handle ICE candidate
   const handleIceCandidate = useCallback(async (data) => {
     try {
       if (peerConnection.current) {
