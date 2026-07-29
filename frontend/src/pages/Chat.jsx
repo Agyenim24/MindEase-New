@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useLayout } from '../components/Layout';
+import CallModal from './CallModal';
 
 const API_BASE = 'http://localhost:5000/api/chat';
 
@@ -33,6 +34,7 @@ function Chat() {
   const [attachment, setAttachment] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [moodSelected, setMoodSelected] = useState(null);
+  const [showCallModal, setShowCallModal] = useState(false);
 
   // ── Header Icon Menus State ─────────────────────────────
   const [showHistory, setShowHistory] = useState(false);
@@ -199,7 +201,6 @@ function Chat() {
 
   // ── Action Handlers for More Menu ──────────────────────
   const handleClearChat = () => {
-    // Remove session ID so a new one is generated
     localStorage.removeItem('mindease_session_id');
     sessionId.current = getSessionId();
 
@@ -520,6 +521,14 @@ function Chat() {
               <span className="material-symbols-outlined text-[18px]">psychology_alt</span>
               CBT Reflection
             </button>
+            <button
+              onClick={() => setShowCallModal(true)}
+              disabled={isLoading}
+              className="flex-shrink-0 px-4 py-2 glass-panel border border-error/20 rounded-full text-error font-label-md text-label-md hover:bg-error-container hover:text-on-error-container transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <span className="material-symbols-outlined text-[18px]">support_agent</span>
+              Talk to Someone
+            </button>
           </div>
 
           {/* Attachment Preview Box */}
@@ -593,6 +602,14 @@ function Chat() {
           </p>
         </div>
       </div>
+
+      {/* Call Modal */}
+      {showCallModal && (
+        <CallModal
+          sessionId={sessionId.current}
+          onClose={() => setShowCallModal(false)}
+        />
+      )}
     </div>
   );
 }
