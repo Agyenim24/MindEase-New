@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useLayout } from '../components/Layout';
-import CallModal from './CallModal';
+import CallModal from "../components/Chat/CallModal";
 
 const API_BASE = 'http://localhost:5000/api/chat';
 
