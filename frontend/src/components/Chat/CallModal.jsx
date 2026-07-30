@@ -36,7 +36,10 @@ function CallModal({ onClose, sessionId }) {
       .catch(() => setAvailable(0));
 
     // Connect socket
-    const socket = io(SOCKET_URL, { transports: ['websocket'] });
+    const socket = io(SOCKET_URL, { 
+  transports: ['polling', 'websocket'],
+  upgrade: true
+});
     socketRef.current = socket;
 
     // Socket event listeners
