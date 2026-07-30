@@ -24,6 +24,10 @@ class Config:
     REPORT_OUTPUT_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), "../database/reports")
     CORS_ORIGINS = "*"
 
+    # --- Professional credential uploads ---
+    PROFESSIONAL_UPLOAD_FOLDER = os.path.join(os.path.abspath(os.path.dirname(__file__)), "uploads", "professional_credentials")
+    MAX_CONTENT_LENGTH = 10 * 1024 * 1024  # 10MB max upload size
+
 
 class DevelopmentConfig(Config):
     DEBUG = True
