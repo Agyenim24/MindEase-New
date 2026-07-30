@@ -12,6 +12,7 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import ProfessionalSignup from './pages/ProfessionalSignup';
 import ProfessionalLogin from './pages/ProfessionalLogin';
+import AdminDashboard from './pages/AdminDashboard';
 import LearnMore from './pages/LearnMore';
 import EmergencySupport from './pages/EmergencySupport';
 import Settings from './pages/Settings';
@@ -27,6 +28,7 @@ function App() {
       <Route path="/signup" element={<Signup />} />
       <Route path="/professional-signup" element={<ProfessionalSignup />} />
       <Route path="/professional-login" element={<ProfessionalLogin />} />
+      <Route path="/admin" element={<AdminDashboard />} />
       <Route element={<Layout />}>
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/chat" element={<Chat />} />
