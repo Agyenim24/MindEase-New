@@ -24,17 +24,19 @@ def create_app(env: str = "default") -> Flask:
         engineio_logger=False
     )
 
-    from routes.chat    import chat_bp
-    from routes.mood    import mood_bp
-    from routes.report  import report_bp
-    from routes.call    import call_bp
-    from routes.auth    import auth_bp
+    from routes.chat         import chat_bp
+    from routes.mood         import mood_bp
+    from routes.report       import report_bp
+    from routes.call         import call_bp
+    from routes.auth         import auth_bp
+    from routes.professional import professional_bp
 
     app.register_blueprint(chat_bp)
     app.register_blueprint(mood_bp)
     app.register_blueprint(report_bp)
     app.register_blueprint(call_bp)
     app.register_blueprint(auth_bp)
+    app.register_blueprint(professional_bp)
 
     from socket_events.call_events      import register_call_events
     from socket_events.volunteer_events import register_volunteer_events
