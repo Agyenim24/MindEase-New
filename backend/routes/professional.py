@@ -1,7 +1,8 @@
 # routes/professional.py
 
 from functools import wraps
-from flask import Blueprint, request, jsonify, current_app
+from flask import Blueprint, request, jsonify, current_app, send_file
+import os
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 
 from models import get_db
@@ -176,6 +177,25 @@ def directory():
 @admin_required
 def pending_list():
     return jsonify({"pending": list_professionals_by_status("pending")}), 200
+
+
+@professional_bp.route("/admin/<prof_id>/document", methods=["GET"])
+@admin_required
+def view_document(prof_id):
+    """
+    GET /api/professional/admin/<prof_id>/document
+    Serves the uploaded credential file so an admin can review it before approving.
+    """
+    db = get_db()
+    prof = db.professionals.find_one({"_id": prof_id})
+    if not prof or not prof.get("document_path"):
+        return jsonify({"error": "Document not found"}), 404
+
+    path = prof["document_path"]
+    if not os.path.exists(path):
+        return jsonify({"error": "Document file missing on server"}), 404
+
+    return send_file(path)
 
 
 @professional_bp.route("/admin/<prof_id>/approve", methods=["POST"])

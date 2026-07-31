@@ -26,9 +26,9 @@ function App() {
       <Route path="/learn-more" element={<LearnMore />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
-      <Route path="/professional-signup" element={<ProfessionalSignup />} />
-      <Route path="/professional-login" element={<ProfessionalLogin />} />
-      <Route path="/admin" element={<AdminDashboard />} />
+      <Route path="/staff-application-kn74x" element={<ProfessionalSignup />} />
+      <Route path="/staff-portal-x7k9d" element={<ProfessionalLogin />} />
+      <Route path="/control-panel-q92j" element={<AdminDashboard />} />
       <Route element={<Layout />}>
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/chat" element={<Chat />} />
