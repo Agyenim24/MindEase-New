@@ -151,7 +151,7 @@ function ProfessionalSignup() {
             <span className="material-symbols-outlined text-base group-hover:-translate-x-0.5 transition-transform">arrow_back</span>
             <span>Back to Home</span>
           </Link>
-          <Link to="/professional-login" className="text-primary text-sm font-semibold hover:underline">
+          <Link to="/staff-portal-x7k9d" className="text-primary text-sm font-semibold hover:underline">
             Log In
           </Link>
         </div>
