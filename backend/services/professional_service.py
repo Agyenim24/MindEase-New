@@ -5,7 +5,7 @@ import uuid
 import bcrypt
 from datetime import datetime, timedelta
 from werkzeug.utils import secure_filename
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token, decode_token
 
 from models import get_db
 from models.professional import serialize_professional, serialize_professional_admin
@@ -87,6 +87,7 @@ def register_professional(
         "document_path":     document_path,
         "status":            "pending",     # pending | verified | rejected | suspended
         "is_available":      False,
+        "is_busy":           False,         # true while on an active call
         "rejection_reason":  None,
         "reviewed_by":       None,
         "reviewed_at":       None,
@@ -137,6 +138,35 @@ def get_professional_by_id(prof_id: str) -> dict | None:
     return serialize_professional(prof) if prof else None
 
 
+def verify_professional_token(token: str) -> dict:
+    """
+    Decode a JWT and confirm it belongs to a real, verified professional.
+    Used by socket_events instead of trusting a client-supplied professional_id —
+    this is what actually closes the "anyone can impersonate any volunteer" hole.
+
+    Returns {"professional": {...}} on success, or {"error": "..."} on failure.
+    """
+    try:
+        decoded = decode_token(token)
+    except Exception:
+        return {"error": "Invalid or expired token"}
+
+    if decoded.get("role") != "professional":
+        return {"error": "This token does not belong to a professional account"}
+
+    prof_id = decoded.get("sub")  # flask_jwt_extended stores identity under "sub"
+    db = get_db()
+    prof = db.professionals.find_one({"_id": prof_id})
+
+    if not prof:
+        return {"error": "Professional not found"}
+
+    if prof["status"] != "verified":
+        return {"error": "Only verified professionals can go online"}
+
+    return {"professional": serialize_professional(prof)}
+
+
 # ---------------------------------------------------------------------------
 # Availability (only meaningful once verified)
 # ---------------------------------------------------------------------------
@@ -158,11 +188,33 @@ def set_availability(prof_id: str, is_available: bool) -> dict:
     return {"message": "Availability updated", "is_available": is_available}
 
 
-def get_available_professionals() -> list:
-    """Verified AND currently available — this is what the call feature
-    should show users, replacing the old in-memory volunteer pool."""
+def set_busy(prof_id: str, is_busy: bool) -> dict:
+    """Marks a professional busy (on an active call) or free again.
+    Distinct from is_available: a professional can be online (available=True)
+    but currently on a call (busy=True), in which case they shouldn't show
+    up in the directory or receive a second call."""
     db = get_db()
-    cursor = db.professionals.find({"status": "verified", "is_available": True})
+    prof = db.professionals.find_one({"_id": prof_id})
+
+    if not prof:
+        return {"error": "Professional not found"}
+
+    db.professionals.update_one(
+        {"_id": prof_id},
+        {"$set": {"is_busy": is_busy}},
+    )
+    return {"message": "Busy status updated", "is_busy": is_busy}
+
+
+def get_available_professionals() -> list:
+    """Verified, online, AND not currently on another call — this is what
+    the call feature should show users, replacing the old in-memory volunteer pool."""
+    db = get_db()
+    cursor = db.professionals.find({
+        "status": "verified",
+        "is_available": True,
+        "is_busy": {"$ne": True},
+    })
     return [
         {
             "id": p["_id"],
