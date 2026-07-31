@@ -158,13 +158,6 @@ function Signup() {
               Log in
             </Link>
           </p>
-
-          <p className="text-center text-sm text-on-surface-variant">
-            Are you a professional?{' '}
-            <Link to="/professional-signup" className="text-primary font-semibold hover:underline">
-              Apply here
-            </Link>
-          </p>
         </div>
       </div>
     </div>
