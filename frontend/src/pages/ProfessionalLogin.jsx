@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { io } from 'socket.io-client';
 
-// Change this if your Flask backend runs somewhere other than localhost:5000
+// Change these if your Flask backend runs somewhere other than localhost:5000
 const API_BASE_URL = 'http://localhost:5000';
+const SOCKET_URL = 'http://localhost:5000';
 
 function ProfessionalLogin() {
   const [email, setEmail] = useState('');
@@ -18,6 +20,52 @@ function ProfessionalLogin() {
   const [isAvailable, setIsAvailable] = useState(false);
   const [isToggling, setIsToggling] = useState(false);
   const [toggleError, setToggleError] = useState('');
+
+  // Real-time call state
+  const socketRef = useRef(null);
+  const [socketStatus, setSocketStatus] = useState('disconnected'); // disconnected | connected
+  const [waitingSession, setWaitingSession] = useState(null); // session_id of a user waiting, or null
+  const [activeCallSession, setActiveCallSession] = useState(null); // session_id of the call in progress
+  const [socketNotice, setSocketNotice] = useState('');
+
+  // Connect the socket once we know who this professional is. Disconnect on unmount
+  // or if they log out, so we never leave a stale connection open.
+  useEffect(() => {
+    if (!professional || professional.status !== 'verified') return;
+
+    const socket = io(SOCKET_URL);
+    socketRef.current = socket;
+
+    socket.on('connect', () => setSocketStatus('connected'));
+    socket.on('disconnect', () => setSocketStatus('disconnected'));
+
+    socket.on('volunteer_error', (data) => {
+      setSocketNotice(data.error || 'A real-time connection error occurred.');
+    });
+
+    socket.on('user_waiting', (data) => {
+      setWaitingSession(data.session_id);
+      setSocketNotice(data.message);
+    });
+
+    socket.on('no_users_waiting', (data) => {
+      setWaitingSession(null);
+      setSocketNotice(data.message);
+    });
+
+    socket.on('call_accepted', (data) => {
+      setSocketNotice(data.message);
+    });
+
+    socket.on('volunteer_status', (data) => {
+      setSocketNotice(`You are now ${data.status}.`);
+    });
+
+    return () => {
+      socket.disconnect();
+      socketRef.current = null;
+    };
+  }, [professional]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -57,6 +105,7 @@ function ProfessionalLogin() {
     const nextValue = !isAvailable;
 
     try {
+      // 1. Persist the change via the regular API (source of truth in the DB)
       const response = await fetch(`${API_BASE_URL}/api/professional/availability`, {
         method: 'PATCH',
         headers: {
@@ -75,11 +124,36 @@ function ProfessionalLogin() {
       }
 
       setIsAvailable(nextValue);
+
+      // 2. Tell the socket layer too, so it can join/leave the professional's
+      // room and start/stop real-time "user waiting" notifications.
+      if (socketRef.current) {
+        socketRef.current.emit(nextValue ? 'volunteer_online' : 'volunteer_offline', { token });
+      }
+      if (!nextValue) {
+        setWaitingSession(null);
+      }
     } catch (err) {
       setToggleError('Could not reach the server.');
     } finally {
       setIsToggling(false);
     }
+  };
+
+  const handleAcceptCall = () => {
+    if (!socketRef.current || !waitingSession) return;
+    socketRef.current.emit('volunteer_accept_call', {
+      token,
+      session_id: waitingSession,
+    });
+    setActiveCallSession(waitingSession);
+    setWaitingSession(null);
+  };
+
+  const handleEndCall = () => {
+    if (!socketRef.current) return;
+    socketRef.current.emit('volunteer_end_call', { token });
+    setActiveCallSession(null);
   };
 
   // --- Logged-in view ---
@@ -136,6 +210,43 @@ function ProfessionalLogin() {
                     : 'Go Online'}
                 </span>
               </button>
+
+              {isAvailable && (
+                <div className="text-xs text-on-surface-variant flex items-center justify-center gap-1.5">
+                  <span
+                    className={`w-2 h-2 rounded-full ${
+                      socketStatus === 'connected' ? 'bg-primary' : 'bg-error'
+                    }`}
+                  />
+                  Real-time connection: {socketStatus}
+                </div>
+              )}
+
+              {socketNotice && (
+                <p className="text-xs text-on-surface-variant bg-surface-container-lowest rounded-lg px-3 py-2">
+                  {socketNotice}
+                </p>
+              )}
+
+              {waitingSession && !activeCallSession && (
+                <button
+                  onClick={handleAcceptCall}
+                  className="w-full bg-primary text-white py-3 rounded-xl text-sm font-semibold hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
+                >
+                  <span className="material-symbols-outlined text-base">call</span>
+                  Accept Waiting Call
+                </button>
+              )}
+
+              {activeCallSession && (
+                <button
+                  onClick={handleEndCall}
+                  className="w-full bg-error text-white py-3 rounded-xl text-sm font-semibold hover:bg-error/90 transition-all shadow-lg shadow-error/20 flex items-center justify-center gap-2"
+                >
+                  <span className="material-symbols-outlined text-base">call_end</span>
+                  End Call
+                </button>
+              )}
             </div>
           ) : (
             <div className="bg-surface border border-outline-variant/60 rounded-xl p-6">
