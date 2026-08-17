@@ -1,6 +1,6 @@
 import React, { useState, createContext, useContext } from 'react';
 import { Outlet, NavLink, Navigate } from 'react-router-dom';
-import Sidebar from './Sidebar';
+import Sidebar from './SideBar';
 import MobileNav from './MobileNav';
 import { useData } from '../context/DataContext';
 
