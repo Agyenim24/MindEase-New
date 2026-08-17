@@ -104,7 +104,10 @@ def create_app(env: str = "default") -> Flask:
     return app
 
 
+# Expose module-level app instance for Gunicorn deployment (e.g. gunicorn app:app)
+env = os.getenv("FLASK_ENV", "development")
+app = create_app(env)
+
 if __name__ == "__main__":
-    env = os.getenv("FLASK_ENV", "development")
-    app = create_app(env)
-    socketio.run(app, host="0.0.0.0", port=5000, debug=app.config["DEBUG"], allow_unsafe_werkzeug=True)
+    port = int(os.getenv("PORT", 5000))
+    socketio.run(app, host="0.0.0.0", port=port, debug=app.config.get("DEBUG", False), allow_unsafe_werkzeug=True)
