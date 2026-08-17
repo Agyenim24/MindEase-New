@@ -1,45 +1,49 @@
+import uuid
 from datetime import datetime
 from . import db
-import bcrypt
+
+
+def generate_uuid():
+    return str(uuid.uuid4())
 
 
 class User(db.Model):
     __tablename__ = "users"
 
-    id              = db.Column(db.Integer, primary_key=True)
-    email           = db.Column(db.Text, unique=True, nullable=False)
-    password_hash   = db.Column(db.Text, nullable=True)  # null for OAuth users
-    full_name       = db.Column(db.Text, nullable=True)
-    avatar_url      = db.Column(db.Text, nullable=True)
-    provider        = db.Column(db.Text, default="email")  # 'email', 'google', 'apple'
-    provider_id     = db.Column(db.Text, nullable=True)    # Google/Apple user ID
-    is_verified     = db.Column(db.Integer, default=0)     # email verified
-    created_at      = db.Column(db.DateTime, default=datetime.utcnow)
-    last_login      = db.Column(db.DateTime, nullable=True)
+    id             = db.Column(db.String(36), primary_key=True, default=generate_uuid)
+    email          = db.Column(db.Text, unique=True, nullable=False)
+    password_hash  = db.Column(db.Text, nullable=False)
+    name           = db.Column(db.Text, nullable=False, default="")
+    avatar_url     = db.Column(db.Text, default="")
+    bio            = db.Column(db.Text, default="")
+    streak         = db.Column(db.Integer, default=0)
+    total_sessions = db.Column(db.Integer, default=0)
+    created_at     = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at     = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    def set_password(self, password: str):
-        """Hash and store password."""
-        self.password_hash = bcrypt.hashpw(
-            password.encode("utf-8"),
-            bcrypt.gensalt()
-        ).decode("utf-8")
+    # Relationships
+    settings          = db.relationship("UserSettings",     backref="user", uselist=False, lazy=True, cascade="all, delete-orphan")
+    mood_logs         = db.relationship("MoodLog",          backref="user", lazy=True, cascade="all, delete-orphan")
+    assessments       = db.relationship("Assessment",       backref="user", lazy=True, cascade="all, delete-orphan")
+    enrollments       = db.relationship("UserEnrollment",   backref="user", lazy=True, cascade="all, delete-orphan")
+    completions       = db.relationship("ModuleCompletion", backref="user", lazy=True, cascade="all, delete-orphan")
+    community_posts   = db.relationship("CommunityPost",    backref="user", lazy=True, cascade="all, delete-orphan")
+    post_comments     = db.relationship("PostComment",      backref="user", lazy=True, cascade="all, delete-orphan")
+    post_likes        = db.relationship("PostLike",         backref="user", lazy=True, cascade="all, delete-orphan")
+    saved_resources   = db.relationship("SavedResource",    backref="user", lazy=True, cascade="all, delete-orphan")
+    emergency_contacts= db.relationship("EmergencyContact", backref="user", lazy=True, cascade="all, delete-orphan")
+    support_tickets   = db.relationship("SupportTicket",    backref="user", lazy=True)
+    badges            = db.relationship("UserBadge",        backref="user", lazy=True, cascade="all, delete-orphan")
 
-    def check_password(self, password: str) -> bool:
-        """Verify password against hash."""
-        if not self.password_hash:
-            return False
-        return bcrypt.checkpw(
-            password.encode("utf-8"),
-            self.password_hash.encode("utf-8")
-        )
-
-    def to_dict(self):
-        return {
-            "id":           self.id,
-            "email":        self.email,
-            "full_name":    self.full_name,
-            "avatar_url":   self.avatar_url,
-            "provider":     self.provider,
-            "is_verified":  bool(self.is_verified),
-            "created_at":   self.created_at.isoformat()
+    def to_dict(self, include_private=False):
+        data = {
+            "id":             self.id,
+            "name":           self.name,
+            "email":          self.email,
+            "avatar_url":     self.avatar_url,
+            "bio":            self.bio,
+            "streak":         self.streak,
+            "total_sessions": self.total_sessions,
+            "created_at":     self.created_at.isoformat() if self.created_at else None,
         }
+        return data

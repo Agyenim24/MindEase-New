@@ -1,23 +1,44 @@
 import React, { useState, createContext, useContext } from 'react';
-import { Outlet, NavLink } from 'react-router-dom';
+import { Outlet, NavLink, Navigate } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import MobileNav from './MobileNav';
+import { useData } from '../context/DataContext';
 
 export const LayoutContext = createContext({
   mobileMenuOpen: false,
-  toggleMobileMenu: () => {},
-  closeMobileMenu: () => {},
+  toggleMobileMenu: () => { },
+  closeMobileMenu: () => { },
   sidebarCollapsed: false,
-  toggleSidebar: () => {},
+  toggleSidebar: () => { },
 });
 
 export const useLayout = () => useContext(LayoutContext);
 
 function Layout() {
+  const { isLoggedIn, isAuthLoading } = useData();
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     return localStorage.getItem('mindease_sidebar_collapsed') === 'true';
   });
+
+  if (isAuthLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-background text-on-background">
+        <div className="flex flex-col items-center gap-4 animate-pulse">
+          <div className="w-12 h-12 rounded-2xl bg-primary/20 flex items-center justify-center border border-primary/30 shadow-lg shadow-primary/10">
+            <span className="material-symbols-outlined text-primary text-2xl animate-spin">sync</span>
+          </div>
+          <p className="text-sm font-semibold text-on-surface-variant tracking-wide">Restoring session...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Strict Auth Guard: If user has not signed up / logged in, redirect to login page
+  if (!isLoggedIn) {
+    return <Navigate to="/login" replace />;
+  }
 
   const toggleMobileMenu = () => setMobileMenuOpen((prev) => !prev);
   const closeMobileMenu = () => setMobileMenuOpen(false);
@@ -49,21 +70,24 @@ function Layout() {
           <div className="md:hidden fixed inset-0 z-50 flex">
             {/* Dark Backdrop */}
             <div
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in"
               onClick={closeMobileMenu}
             />
 
             {/* Slide-out Drawer */}
-            <div className="relative flex-1 max-w-xs w-full bg-surface-container-low h-full p-4 flex flex-col justify-between shadow-2xl z-10">
+            <div className="relative w-[75vw] max-w-[300px] bg-surface-container-low h-full p-4 flex flex-col justify-between shadow-2xl z-10 animate-slide-in-left overflow-y-auto overflow-x-hidden">
               <div className="space-y-4">
                 <div className="flex items-center justify-between px-4 pt-2">
-                  <div>
-                    <h1 className="font-headline-md text-headline-md font-bold text-primary tracking-tight">MindEase</h1>
-                    <p className="font-label-md text-label-md text-on-surface-variant">Mental Wellbeing</p>
+                  <div className="flex items-center gap-2">
+                    <img src="/mindEaseLogo.png" alt="MindEase Logo" className="w-6 h-6 object-contain shrink-0 logo-blue" />
+                    <div>
+                      <h1 className="font-headline-md text-headline-md font-bold text-primary tracking-tight">MindEase</h1>
+                      <p className="font-label-md text-label-md text-on-surface-variant">Mental Wellbeing</p>
+                    </div>
                   </div>
                   <button
                     onClick={closeMobileMenu}
-                    className="p-2 text-on-surface-variant hover:text-primary transition-colors"
+                    className="p-2 rounded-xl text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors"
                   >
                     <span className="material-symbols-outlined">close</span>
                   </button>
@@ -71,9 +95,7 @@ function Layout() {
 
                 <nav className="space-y-1">
                   {[
-                    { name: 'Home', path: '/', icon: 'home' },
                     { name: 'Dashboard', path: '/dashboard', icon: 'dashboard' },
-                    { name: 'Take Assessment', path: '/assessment', icon: 'psychology' },
                     { name: 'Programs', path: '/programs', icon: 'apps' },
                     { name: 'Community', path: '/community', icon: 'group' },
                     { name: 'Resources', path: '/resources', icon: 'menu_book' },
@@ -84,13 +106,11 @@ function Layout() {
                       key={item.name}
                       to={item.path}
                       onClick={closeMobileMenu}
-
                       end={item.path === '/'}
                       className={({ isActive }) =>
-                        `rounded-xl flex items-center gap-3 px-4 py-3 transition-all ${
-                          isActive
-                            ? 'bg-primary-container text-on-primary-container font-semibold'
-                            : 'text-on-surface-variant hover:bg-surface-container-high'
+                        `rounded-xl flex items-center gap-3 px-4 py-3 transition-all active:scale-95 ${isActive
+                          ? 'bg-primary-container text-on-primary-container font-semibold shadow-sm'
+                          : 'text-on-surface-variant hover:bg-surface-container-high'
                         }`
                       }
                     >
@@ -105,7 +125,7 @@ function Layout() {
                 <NavLink
                   to="/emergency"
                   onClick={closeMobileMenu}
-                  className="w-full rounded-xl px-4 py-2.5 flex items-center justify-center gap-2 text-error border border-error/20 hover:bg-error/10 font-semibold"
+                  className="w-full rounded-xl px-4 py-2.5 flex items-center justify-center gap-2 text-error border border-error/20 hover:bg-error/10 font-semibold transition-all active:scale-95"
                 >
                   <span className="material-symbols-outlined text-[20px] fill-icon">emergency</span>
                   <span className="font-label-md text-label-md">Emergency Support</span>
@@ -113,7 +133,7 @@ function Layout() {
                 <NavLink
                   to="/settings"
                   onClick={closeMobileMenu}
-                  className="w-full rounded-xl flex items-center gap-3 px-4 py-2.5 text-on-surface-variant hover:bg-surface-container-high"
+                  className="w-full rounded-xl flex items-center gap-3 px-4 py-2.5 text-on-surface-variant hover:bg-surface-container-high transition-all active:scale-95"
                 >
                   <span className="material-symbols-outlined">settings</span>
                   <span className="font-label-md text-label-md">Settings</span>
@@ -121,7 +141,7 @@ function Layout() {
                 <NavLink
                   to="/help"
                   onClick={closeMobileMenu}
-                  className="w-full rounded-xl flex items-center gap-3 px-4 py-2.5 text-on-surface-variant hover:bg-surface-container-high"
+                  className="w-full rounded-xl flex items-center gap-3 px-4 py-2.5 text-on-surface-variant hover:bg-surface-container-high transition-all active:scale-95"
                 >
                   <span className="material-symbols-outlined">help</span>
                   <span className="font-label-md text-label-md">Help</span>
@@ -131,13 +151,12 @@ function Layout() {
           </div>
         )}
 
-        {/* Main Content Viewport — margin dynamically shifts based on sidebar collapse */}
+        {/* Main Content Viewport */}
         <div
-          className={`${
-            sidebarCollapsed ? 'md:ml-20' : 'md:ml-64'
-          } flex-1 flex flex-col h-full min-w-0 overflow-hidden transition-all duration-300`}
+          className={`${sidebarCollapsed ? 'md:ml-20 duration-[200ms]' : 'md:ml-64 duration-[280ms]'
+            } flex-1 flex flex-col h-full min-w-0 overflow-hidden transition-[margin-left] [transition-timing-function:cubic-bezier(0.4,0,0.2,1)] will-change-[margin-left]`}
         >
-          <main className="flex-1 flex flex-col min-h-0 overflow-hidden pb-20 md:pb-0">
+          <main className="flex-1 flex flex-col min-h-0 overflow-y-auto pb-20 md:pb-0">
             <Outlet />
           </main>
         </div>

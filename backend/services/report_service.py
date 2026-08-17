@@ -1,10 +1,3 @@
-from reportlab.lib.pagesizes import A4
-from reportlab.lib import colors
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.units import cm
-from models import get_db
-from utils.helpers import format_datetime, emotion_to_emoji
 from flask import current_app
 from datetime import datetime
 from collections import Counter
@@ -13,6 +6,17 @@ import os
 
 def generate_pdf_report(session_id: str) -> str:
     """Generate a weekly mood summary PDF and return its file path."""
+    try:
+        from reportlab.lib.pagesizes import A4
+        from reportlab.lib import colors
+        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+        from reportlab.lib.units import cm
+    except ImportError:
+        raise RuntimeError("ReportLab library is not installed.")
+
+    from models import MoodLog
+    from utils.helpers import format_datetime, emotion_to_emoji
 
     output_dir = current_app.config.get("REPORT_OUTPUT_DIR", "/tmp")
     os.makedirs(output_dir, exist_ok=True)
@@ -34,18 +38,12 @@ def generate_pdf_report(session_id: str) -> str:
     story.append(Spacer(1, 0.5*cm))
 
     # Mood Summary Table
-    db    = get_db()
-    logs  = list(db.mood_logs.find({"session_id": session_id}).sort("logged_at", 1))
-    total = Counter()
-
-    for log in logs:
-        counts = log.get("emotion_counts", {})
-        total.update(counts)
-
+    logs  = MoodLog.query.filter_by(user_id=session_id).order_by(MoodLog.logged_at).all()
     story.append(Paragraph("Emotion Summary", styles["Heading2"]))
-    if total:
+    if logs:
+        counter = Counter(log.emotion for log in logs)
         table_data = [["Emotion", "Count", "Emoji"]]
-        for emotion, count in sorted(total.items(), key=lambda x: -x[1]):
+        for emotion, count in sorted(counter.items(), key=lambda x: -x[1]):
             table_data.append([emotion.capitalize(), str(count), emotion_to_emoji(emotion)])
 
         table = Table(table_data, colWidths=[5*cm, 3*cm, 3*cm])

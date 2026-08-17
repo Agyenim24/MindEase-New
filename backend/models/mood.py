@@ -1,26 +1,27 @@
+import uuid
 from datetime import datetime
 from . import db
-import json
+
+
+def generate_uuid():
+    return str(uuid.uuid4())
+
 
 class MoodLog(db.Model):
     __tablename__ = "mood_logs"
 
-    id               = db.Column(db.Integer, primary_key=True)
-    session_id       = db.Column(db.Text, db.ForeignKey("sessions.session_id"), nullable=False)
-    dominant_emotion = db.Column(db.Text, nullable=False)
-    emotion_counts   = db.Column(db.Text, nullable=False)
-    message_count    = db.Column(db.Integer, default=0)
-    logged_at        = db.Column(db.DateTime, default=datetime.utcnow)
-
-    def get_emotion_counts(self):
-        return json.loads(self.emotion_counts)
+    id        = db.Column(db.String(36), primary_key=True, default=generate_uuid)
+    user_id   = db.Column(db.String(36), db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    emotion   = db.Column(db.Text, nullable=False)
+    note      = db.Column(db.Text, default="")
+    logged_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def to_dict(self):
         return {
-            "id":               self.id,
-            "session_id":       self.session_id,
-            "dominant_emotion": self.dominant_emotion,
-            "emotion_counts":   self.get_emotion_counts(),
-            "message_count":    self.message_count,
-            "logged_at":        self.logged_at.isoformat()
+            "id":        self.id,
+            "user_id":   self.user_id,
+            "emotion":   self.emotion,
+            "note":      self.note,
+            "date":      self.logged_at.strftime("%Y-%m-%d") if self.logged_at else None,
+            "logged_at": self.logged_at.isoformat() if self.logged_at else None,
         }

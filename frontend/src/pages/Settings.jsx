@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useLayout } from '../components/Layout';
 import { useTheme } from '../context/ThemeContext';
 import { useData } from '../context/DataContext';
@@ -7,17 +7,70 @@ import { useData } from '../context/DataContext';
 function Settings() {
   const { toggleMobileMenu } = useLayout();
   const { darkMode, setDarkMode } = useTheme();
-  const { profile, updateProfile, settings, updateSettings, resetAllData } = useData();
+  const { profile, updateProfile, settings, updateSettings, resetAllData, deleteUserAccount } = useData();
+  const navigate = useNavigate();
 
-  const [fullName, setFullName] = useState(profile.name);
-  const [email, setEmail] = useState(profile.email);
+  const [fullName, setFullName] = useState(profile?.name || '');
+  const [email, setEmail] = useState(profile?.email || '');
 
-  const [emailNotifs, setEmailNotifs] = useState(settings.emailNotifications);
-  const [dailyReminders, setDailyReminders] = useState(settings.dailyCheckinReminder);
-  const [soundEffects, setSoundEffects] = useState(settings.soundEffects);
-  const [privacyLevel, setPrivacyLevel] = useState(settings.privacyLevel);
+  const [emailNotifs, setEmailNotifs] = useState(settings?.emailNotifications ?? true);
+  const [dailyReminders, setDailyReminders] = useState(settings?.dailyCheckinReminder ?? true);
+  const [soundEffects, setSoundEffects] = useState(settings?.soundEffects ?? true);
+  const [privacyLevel, setPrivacyLevel] = useState(settings?.privacyLevel || 'standard');
 
   const [toastMsg, setToastMsg] = useState(null);
+
+  // Delete Account modal state
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteStep, setDeleteStep] = useState(1); // 1 = warning, 2 = password confirmation
+  const [deletePassword, setDeletePassword] = useState('');
+  const [deleteErrorMsg, setDeleteErrorMsg] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+  const deleteInputRef = useRef(null);
+
+  // Focus the password input when step 2 is shown
+  useEffect(() => {
+    if (deleteStep === 2 && deleteInputRef.current) {
+      deleteInputRef.current.focus();
+    }
+  }, [deleteStep]);
+
+  // Reset modal state when closed
+  const closeDeleteModal = () => {
+    setShowDeleteModal(false);
+    setTimeout(() => {
+      setDeleteStep(1);
+      setDeletePassword('');
+      setDeleteErrorMsg('');
+      setIsDeleting(false);
+    }, 200);
+  };
+
+  const handleDeleteAccount = async (e) => {
+    if (e) e.preventDefault();
+    if (!deletePassword) {
+      setDeleteErrorMsg('Please enter your account password.');
+      return;
+    }
+    setDeleteErrorMsg('');
+    setIsDeleting(true);
+    try {
+      if (typeof deleteUserAccount === 'function') {
+        await deleteUserAccount(deletePassword);
+      } else {
+        await apiDeleteAccount(deletePassword);
+        resetAllData();
+        localStorage.clear();
+      }
+      setIsDeleting(false);
+      closeDeleteModal();
+      navigate('/login');
+    } catch (err) {
+      console.error('Error deleting account:', err);
+      setDeleteErrorMsg(err.message || 'Incorrect password. Please verify your password to delete your account.');
+      setIsDeleting(false);
+    }
+  };
 
   const showToast = (msg) => {
     setToastMsg(msg);
@@ -190,6 +243,17 @@ function Settings() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <button
+                  onClick={() => navigate('/assessment?retake=true')}
+                  className="p-4 bg-primary/5 border border-primary/20 rounded-2xl flex items-center justify-between hover:bg-primary/10 transition text-left"
+                >
+                  <div>
+                    <p className="font-bold text-xs text-primary">Retake Wellness Assessment</p>
+                    <p className="text-[10px] text-on-surface-variant">Update your personalization profile</p>
+                  </div>
+                  <span className="material-symbols-outlined text-primary text-xl">psychology</span>
+                </button>
+
+                <button
                   onClick={handleExportData}
                   className="p-4 bg-surface-container-low rounded-2xl border border-outline-variant/20 flex items-center justify-between hover:bg-surface-container-high transition text-left"
                 >
@@ -234,9 +298,215 @@ function Settings() {
               </button>
             </div>
 
+            {/* ─── Danger Zone ─── */}
+            <div className="relative mt-4 rounded-[2rem] border-2 border-red-500/30 bg-gradient-to-br from-red-500/[0.04] to-red-900/[0.06] p-6 space-y-5 overflow-hidden">
+              {/* Decorative corner glow */}
+              <div className="pointer-events-none absolute -top-16 -right-16 h-40 w-40 rounded-full bg-red-500/10 blur-3xl" />
+
+              {/* Section header */}
+              <div className="flex items-center gap-3 relative z-10">
+                <div className="bg-red-500/15 p-2.5 rounded-xl text-red-500">
+                  <span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>warning</span>
+                </div>
+                <div>
+                  <h3 className="font-headline-md text-lg font-bold text-red-500">Danger Zone</h3>
+                  <p className="text-[11px] text-on-surface-variant mt-0.5">Irreversible actions — proceed with extreme caution.</p>
+                </div>
+              </div>
+
+              {/* Divider */}
+              <div className="border-t border-red-500/15" />
+
+              {/* Delete Account card */}
+              <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-surface-container-lowest/80 backdrop-blur border border-red-500/20">
+                <div className="space-y-1">
+                  <p className="font-bold text-sm text-on-surface flex items-center gap-2">
+                    <span className="material-symbols-outlined text-red-500 text-lg">person_remove</span>
+                    Delete Account
+                  </p>
+                  <p className="text-[11px] text-on-surface-variant leading-relaxed max-w-full">
+                    Permanently delete your MindEase account and erase all associated data including mood logs, chat history, program progress, and community posts. This action cannot be undone.
+                  </p>
+                </div>
+                <button
+                  id="delete-account-trigger"
+                  onClick={() => setShowDeleteModal(true)}
+                  className="shrink-0 group relative px-6 py-3 rounded-xl font-bold text-xs text-red-500 border-2 border-red-500/30 bg-red-500/5 hover:bg-red-500 hover:text-white hover:border-red-500 hover:shadow-lg hover:shadow-red-500/20 transition-all duration-300 active:scale-[0.97]"
+                >
+                  <span className="flex items-center gap-2">
+                    <span className="material-symbols-outlined text-base">delete_forever</span>
+                    Delete My Account
+                  </span>
+                </button>
+              </div>
+            </div>
+
           </div>
         </section>
       </div>
+
+      {/* ─── Delete Account Confirmation Modal ─── */}
+      {showDeleteModal && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+          onClick={(e) => { if (e.target === e.currentTarget && !isDeleting) closeDeleteModal(); }}
+        >
+          {/* Backdrop */}
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-[fadeIn_0.2s_ease-out]" />
+
+          {/* Modal */}
+          <div className="relative w-full max-w-[500px] bg-surface rounded-[2rem] shadow-2xl border border-outline-variant/20 overflow-hidden animate-[scaleIn_0.25s_ease-out]">
+            {/* Red accent bar */}
+            <div className="h-1.5 w-full bg-gradient-to-r from-red-500 via-red-400 to-orange-500" />
+
+            {/* Modal content */}
+            <div className="p-6 sm:p-8">
+
+              {/* Step 1: Warning */}
+              {deleteStep === 1 && (
+                <div className="space-y-5">
+                  {/* Icon */}
+                  <div className="flex justify-center">
+                    <div className="relative">
+                      <div className="absolute inset-0 bg-red-500/20 rounded-full blur-xl animate-pulse" />
+                      <div className="relative w-16 h-16 rounded-full bg-red-500/10 border-2 border-red-500/30 flex items-center justify-center">
+                        <span className="material-symbols-outlined text-red-500 text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>warning</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Title */}
+                  <div className="text-center space-y-2">
+                    <h2 className="font-headline-md text-xl font-bold text-on-surface">Delete Your Account?</h2>
+                    <p className="text-sm text-on-surface-variant leading-relaxed">
+                      This is a permanent action that <strong className="text-red-500">cannot be reversed</strong>. Please review what will be lost:
+                    </p>
+                  </div>
+
+                  {/* Consequences list */}
+                  <div className="space-y-2.5 p-4 rounded-2xl bg-red-500/5 border border-red-500/15">
+                    {[
+                      { icon: 'mood', label: 'All mood logs & tracking history' },
+                      { icon: 'chat_bubble', label: 'Complete chat conversation history' },
+                      { icon: 'school', label: 'Program progress & earned badges' },
+                      { icon: 'groups', label: 'Community posts & interactions' },
+                      { icon: 'settings', label: 'Account preferences & saved data' },
+                    ].map((item) => (
+                      <div key={item.icon} className="flex items-center gap-3 text-sm">
+                        <span className="material-symbols-outlined text-red-400 text-lg shrink-0">{item.icon}</span>
+                        <span className="text-on-surface-variant text-xs font-medium">{item.label}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Action buttons */}
+                  <div className="flex flex-col-reverse sm:flex-row gap-3 pt-2">
+                    <button
+                      onClick={closeDeleteModal}
+                      className="flex-1 px-5 py-3 rounded-xl font-bold text-xs text-on-surface-variant border border-outline-variant/30 hover:bg-surface-container-high transition"
+                    >
+                      Cancel — Keep My Account
+                    </button>
+                    <button
+                      onClick={() => setDeleteStep(2)}
+                      className="flex-1 px-5 py-3 rounded-xl font-bold text-xs text-white bg-red-500 hover:bg-red-600 shadow-lg shadow-red-500/20 transition active:scale-[0.98] flex items-center justify-center gap-2"
+                    >
+                      <span className="material-symbols-outlined text-base">arrow_forward</span>
+                      Continue with Deletion
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Step 2: Confirm Account Password */}
+              {deleteStep === 2 && (
+                <form onSubmit={handleDeleteAccount} className="space-y-5">
+                  {/* Icon */}
+                  <div className="flex justify-center">
+                    <div className="relative w-16 h-16 rounded-full bg-red-500/10 border-2 border-red-500/30 flex items-center justify-center">
+                      <span className="material-symbols-outlined text-red-500 text-3xl">lock_reset</span>
+                    </div>
+                  </div>
+
+                  {/* Title */}
+                  <div className="text-center space-y-2">
+                    <h2 className="font-headline-md text-xl font-bold text-on-surface">Confirm Your Password</h2>
+                    <p className="text-sm text-on-surface-variant leading-relaxed">
+                      Enter your account password to authorize permanent deletion of your account and all associated data.
+                    </p>
+                  </div>
+
+                  {/* Password Input */}
+                  <div className="space-y-2">
+                    <label htmlFor="delete-password-input" className="text-xs font-bold text-on-surface-variant block">
+                      Account Password
+                    </label>
+                    <input
+                      ref={deleteInputRef}
+                      id="delete-password-input"
+                      type="password"
+                      value={deletePassword}
+                      onChange={(e) => { setDeletePassword(e.target.value); setDeleteErrorMsg(''); }}
+                      placeholder="Enter your current password..."
+                      disabled={isDeleting}
+                      autoComplete="current-password"
+                      className={`w-full px-4 py-3.5 rounded-xl text-sm border-2 transition-all duration-200 focus:outline-none ${deleteErrorMsg
+                        ? 'border-red-500 bg-red-500/5 text-red-500 ring-2 ring-red-500/10'
+                        : 'border-outline-variant/30 bg-surface-container-low text-on-surface focus:border-red-500/50 focus:ring-2 focus:ring-red-500/10'
+                        } ${isDeleting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    />
+                    {deleteErrorMsg && (
+                      <p className="text-[11px] text-red-500 font-semibold animate-[fadeIn_0.15s_ease-out]">
+                        {deleteErrorMsg}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Action buttons */}
+                  <div className="flex flex-col-reverse sm:flex-row gap-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => { setDeleteStep(1); setDeletePassword(''); setDeleteErrorMsg(''); }}
+                      disabled={isDeleting}
+                      className="flex-1 px-5 py-3 rounded-xl font-bold text-xs text-on-surface-variant border border-outline-variant/30 hover:bg-surface-container-high transition disabled:opacity-50"
+                    >
+                      <span className="flex items-center justify-center gap-2">
+                        <span className="material-symbols-outlined text-base">arrow_back</span>
+                        Go Back
+                      </span>
+                    </button>
+                    <button
+                      id="delete-account-confirm"
+                      type="submit"
+                      disabled={!deletePassword || isDeleting}
+                      className={`flex-1 px-5 py-3 rounded-xl font-bold text-xs transition-all duration-300 flex items-center justify-center gap-2 ${deletePassword && !isDeleting
+                        ? 'text-white bg-red-500 hover:bg-red-600 shadow-lg shadow-red-500/25 active:scale-[0.98] cursor-pointer'
+                        : 'text-on-surface-variant/40 bg-surface-container-low border border-outline-variant/20 cursor-not-allowed'
+                        }`}
+                    >
+                      {isDeleting ? (
+                        <>
+                          <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                          </svg>
+                          <span>Deleting Account…</span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="material-symbols-outlined text-base">delete_forever</span>
+                          <span>Confirm Permanent Deletion</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </form>
+              )}
+
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Toast Notification */}
       {toastMsg && (
@@ -245,6 +515,18 @@ function Settings() {
           <span>{toastMsg}</span>
         </div>
       )}
+
+      {/* Keyframe animations for modal */}
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes scaleIn {
+          from { opacity: 0; transform: scale(0.92) translateY(12px); }
+          to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+      `}</style>
     </div>
   );
 }

@@ -1,21 +1,36 @@
-from transformers import pipeline
 from flask import current_app
-import torch
 
-# Lazy-loaded pipeline (loads once on first use)
 _classifier = None
 
 def get_classifier():
     global _classifier
     if _classifier is None:
-        # Use a pretrained emotion pipeline from Hugging Face
-        _classifier = pipeline(
-            "text-classification",
-            model="j-hartmann/emotion-english-distilroberta-base",
-            top_k=None,
-            device=0 if torch.cuda.is_available() else -1
-        )
+        try:
+            from transformers import pipeline
+            import torch
+            _classifier = pipeline(
+                "text-classification",
+                model="j-hartmann/emotion-english-distilroberta-base",
+                top_k=None,
+                device=0 if torch.cuda.is_available() else -1
+            )
+        except Exception as e:
+            print(f"Transformers unavailable, fallback mode enabled: {e}")
+            _classifier = "fallback"
     return _classifier
+
+
+def _fallback_emotion(text: str) -> dict:
+    t = text.lower()
+    if any(w in t for w in ["anxious", "panic", "worry", "worried", "scared", "fear", "nervous", "overwhelmed"]):
+        return {"emotion": "anxiety", "score": 0.85, "all_scores": {"anxiety": 0.85}}
+    if any(w in t for w in ["stress", "stressed", "burnout", "pressure", "exhausted", "tired"]):
+        return {"emotion": "stress", "score": 0.80, "all_scores": {"stress": 0.80}}
+    if any(w in t for w in ["sad", "depressed", "lonely", "hopeless", "down", "cry"]):
+        return {"emotion": "depression", "score": 0.82, "all_scores": {"depression": 0.82}}
+    if any(w in t for w in ["happy", "good", "great", "calm", "relax", "peace", "glad", "awesome"]):
+        return {"emotion": "positive", "score": 0.90, "all_scores": {"positive": 0.90}}
+    return {"emotion": "neutral", "score": 0.70, "all_scores": {"neutral": 0.70}}
 
 
 def detect_emotion(text: str) -> dict:
@@ -25,9 +40,10 @@ def detect_emotion(text: str) -> dict:
     """
     try:
         classifier = get_classifier()
-        results    = classifier(text[:512])[0]
+        if classifier == "fallback" or classifier is None:
+            return _fallback_emotion(text)
 
-        # Map model labels to our app labels
+        results = classifier(text[:512])[0]
         label_map = {
             "joy":      "positive",
             "neutral":  "neutral",
@@ -54,5 +70,6 @@ def detect_emotion(text: str) -> dict:
         }
 
     except Exception as e:
-        current_app.logger.error(f"Emotion detection error: {e}")
-        return {"emotion": "neutral", "score": 1.0, "all_scores": {}}
+        if current_app:
+            current_app.logger.error(f"Emotion detection error: {e}")
+        return _fallback_emotion(text)

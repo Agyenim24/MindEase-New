@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from models import get_db
+from models import db, Session
 from services.chat_service import handle_message, get_chat_history, log_mood_summary
 from utils.validators import validate_session_id, validate_message
 from datetime import datetime
@@ -7,38 +7,36 @@ from datetime import datetime
 chat_bp = Blueprint("chat", __name__, url_prefix="/api/chat")
 
 
-def get_or_create_session(session_id: str, language: str = "en"):
-    """Get existing session or create a new one in MongoDB."""
-    db = get_db()
-    session = db.sessions.find_one({"session_id": session_id})
+def get_or_create_session(session_id: str, language: str = "en") -> Session:
+    session = Session.query.filter_by(session_id=session_id).first()
     if not session:
-        db.sessions.insert_one({
-            "session_id": session_id,
-            "language":   language,
-            "created_at": datetime.utcnow().isoformat(),
-            "last_seen":  datetime.utcnow().isoformat()
-        })
-    else:
-        db.sessions.update_one(
-            {"session_id": session_id},
-            {"$set": {"last_seen": datetime.utcnow().isoformat()}}
-        )
+        session = Session(session_id=session_id, language=language)
+        db.session.add(session)
+    session.last_seen = datetime.utcnow()
+    try:
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+    return session
 
 
 @chat_bp.route("/message", methods=["POST"])
 def send_message():
-    data       = request.get_json()
-    session_id = data.get("session_id", "").strip()
-    message    = data.get("message", "").strip()
+    import uuid
+    data       = request.get_json() or {}
+    session_id = str(data.get("session_id", "") or "").strip()
+    message    = str(data.get("message", "") or "").strip()
     language   = data.get("language", "en")
+    tone       = data.get("tone", "Empathetic")
+    assessment = data.get("assessment") or None
 
     if not validate_session_id(session_id):
-        return jsonify({"error": "Invalid or missing session_id"}), 400
+        session_id = str(uuid.uuid4())
     if not validate_message(message):
         return jsonify({"error": "Message cannot be empty"}), 400
 
     get_or_create_session(session_id, language)
-    result = handle_message(session_id, message, language)
+    result = handle_message(session_id, message, language, tone, assessment)
     return jsonify(result), 200
 
 
@@ -66,6 +64,9 @@ def end_session():
 
 @chat_bp.route("/reaction", methods=["POST"])
 def add_reaction():
+    from models import Message
+    from models.reaction import Reaction
+
     data       = request.get_json()
     message_id = data.get("message_id")
     reaction   = data.get("reaction")
@@ -73,14 +74,11 @@ def add_reaction():
     if reaction not in ("up", "down"):
         return jsonify({"error": "Reaction must be 'up' or 'down'"}), 400
 
-    db  = get_db()
-    msg = db.messages.find_one({"_id": message_id})
+    msg = Message.query.get(message_id)
     if not msg:
         return jsonify({"error": "Message not found"}), 404
 
-    db.reactions.insert_one({
-        "message_id": message_id,
-        "reaction":   reaction,
-        "created_at": datetime.utcnow().isoformat()
-    })
+    r = Reaction(message_id=message_id, reaction=reaction)
+    db.session.add(r)
+    db.session.commit()
     return jsonify({"message": "Reaction saved"}), 201

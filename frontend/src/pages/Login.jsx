@@ -1,27 +1,57 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useData } from '../context/DataContext';
+import { apiLogin, apiResetPassword } from '../services/api';
 
 function Login() {
   const navigate = useNavigate();
-  const { updateProfile } = useData();
+  const { isLoggedIn, updateProfile, signIn, initExistingUserSession } = useData();
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [isLoggedIn, navigate]);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState(null);
+  const [isResetMode, setIsResetMode] = useState(false);
+  const [successMsg, setSuccessMsg] = useState(null);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (email) {
-      const extractedName = email.split('@')[0].replace('.', ' ');
-      const capitalizedName = extractedName.charAt(0).toUpperCase() + extractedName.slice(1);
-      updateProfile({
-        email,
-        name: capitalizedName || 'User'
-      });
+    setLoading(true);
+    setErrorMsg(null);
+    setSuccessMsg(null);
+
+    try {
+      let res;
+      if (isResetMode) {
+        res = await apiResetPassword({ email, password });
+        setSuccessMsg('Password updated successfully! Signing you in...');
+      } else {
+        res = await apiLogin({ email, password });
+      }
+
+      initExistingUserSession(res.user, res.settings, res.daily_checkin_streak ?? null);
+
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, isResetMode ? 800 : 0);
+    } catch (err) {
+      console.error('Auth failed:', err);
+      if (err.message === 'Failed to fetch' || err.message?.includes('fetch')) {
+        setErrorMsg('Could not connect to backend server. Please verify the Flask server is running at http://127.0.0.1:5000');
+      } else {
+        setErrorMsg(err.message || 'Authentication failed. Please check your credentials.');
+      }
+    } finally {
+      setLoading(false);
     }
-    navigate('/dashboard');
   };
 
   return (
@@ -68,9 +98,40 @@ function Login() {
 
         <div className="w-full max-w-[420px] space-y-7 animate-slide-up">
           <div className="space-y-2">
-            <h1 className="text-3xl font-bold text-on-surface tracking-tight">Welcome back 👋</h1>
-            <p className="text-on-surface-variant text-sm">Enter your credentials to access your dashboard.</p>
+            <h1 className="text-3xl font-bold text-on-surface tracking-tight">
+              {isResetMode ? 'Reset Password ' : 'Welcome back '}
+            </h1>
+            <p className="text-on-surface-variant text-sm">
+              {isResetMode
+                ? 'Enter your email and new password to reset your account credentials.'
+                : 'Enter your credentials to access your dashboard.'}
+            </p>
           </div>
+
+          {errorMsg && (
+            <div className="p-4 bg-rose-500/10 text-rose-600 rounded-2xl text-xs font-semibold border border-rose-500/20 flex flex-col gap-2">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-base">error</span>
+                <span>{errorMsg}</span>
+              </div>
+              <div className="flex items-center gap-3 pt-1">
+                <button
+                  type="button"
+                  onClick={() => { setIsResetMode(true); setErrorMsg(null); }}
+                  className="text-primary font-bold underline hover:opacity-80 text-xs text-left"
+                >
+                  Forgot your password? Reset it here →
+                </button>
+              </div>
+            </div>
+          )}
+
+          {successMsg && (
+            <div className="p-4 bg-emerald-500/10 text-emerald-600 rounded-2xl text-xs font-semibold border border-emerald-500/20 flex items-center gap-2">
+              <span className="material-symbols-outlined text-base">check_circle</span>
+              <span>{successMsg}</span>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
@@ -82,7 +143,7 @@ function Login() {
                   required
                   id="email"
                   type="email"
-                  placeholder="alex.morgan@example.com"
+                  placeholder="your.email@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full bg-surface border border-outline-variant/60 rounded-xl px-4 py-3.5 text-sm text-on-surface placeholder:text-outline/80 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all duration-200"
@@ -93,15 +154,22 @@ function Login() {
             <div className="space-y-1.5">
               <div className="flex justify-between items-center">
                 <label htmlFor="password" className="block text-sm font-semibold text-on-surface">
-                  Password
+                  {isResetMode ? 'New Password' : 'Password'}
                 </label>
+                <button
+                  type="button"
+                  onClick={() => { setIsResetMode(!isResetMode); setErrorMsg(null); setSuccessMsg(null); }}
+                  className="text-xs text-primary font-medium hover:underline"
+                >
+                  {isResetMode ? 'Back to Login' : 'Forgot Password?'}
+                </button>
               </div>
               <div className="relative">
                 <input
                   required
                   id="password"
                   type={showPassword ? 'text' : 'password'}
-                  placeholder="••••••••"
+                  placeholder={isResetMode ? 'Enter new password' : '••••••••'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full bg-surface border border-outline-variant/60 rounded-xl px-4 py-3.5 text-sm text-on-surface placeholder:text-outline/80 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all duration-200"
@@ -118,24 +186,31 @@ function Login() {
               </div>
             </div>
 
-            <div className="flex items-center gap-2.5 pt-1">
-              <input
-                id="remember"
-                type="checkbox"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-                className="w-4 h-4 rounded border-outline-variant accent-primary cursor-pointer"
-              />
-              <label htmlFor="remember" className="text-sm text-on-surface-variant cursor-pointer select-none">
-                Remember me on this device
-              </label>
-            </div>
+            {!isResetMode && (
+              <div className="flex items-center gap-2.5 pt-1">
+                <input
+                  id="remember"
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="w-4 h-4 rounded border-outline-variant accent-primary cursor-pointer"
+                />
+                <label htmlFor="remember" className="text-sm text-on-surface-variant cursor-pointer select-none">
+                  Remember me on this device
+                </label>
+              </div>
+            )}
 
             <button
               type="submit"
-              className="w-full bg-primary text-white py-3.5 rounded-xl text-sm font-semibold hover:bg-primary/90 active:scale-98 transition-all duration-150 shadow-lg shadow-primary/20 mt-2 flex items-center justify-center gap-2"
+              disabled={loading}
+              className="w-full bg-primary text-white py-3.5 rounded-xl text-sm font-semibold hover:bg-primary/90 active:scale-98 transition-all duration-150 shadow-lg shadow-primary/20 mt-2 flex items-center justify-center gap-2 disabled:opacity-50"
             >
-              <span>Sign In</span>
+              <span>
+                {loading
+                  ? (isResetMode ? 'Updating Password...' : 'Signing In...')
+                  : (isResetMode ? 'Reset & Sign In' : 'Sign In')}
+              </span>
               <span className="material-symbols-outlined text-base">arrow_forward</span>
             </button>
           </form>

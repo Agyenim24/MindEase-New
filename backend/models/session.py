@@ -11,7 +11,6 @@ class Session(db.Model):
     last_seen   = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     messages    = db.relationship("Message", backref="session", lazy=True)
-    mood_logs   = db.relationship("MoodLog", backref="session", lazy=True)
 
     def to_dict(self):
         return {

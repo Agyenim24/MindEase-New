@@ -1,62 +1,70 @@
-from models import get_db
+from models import db, Message, MoodLog
 from services.emotion_service import detect_emotion
 from services.crisis_service  import is_crisis, get_crisis_response
 from services.coping_service  import format_bot_message
+from services.openrouter_service import generate_openrouter_response
 from datetime import datetime
 import json
-import uuid
 
 
-def handle_message(session_id: str, user_text: str, language: str = "en") -> dict:
+def handle_message(session_id: str, user_text: str, language: str = "en", tone: str = "Empathetic", assessment: dict = None) -> dict:
     """
     Core chat pipeline:
     1. Detect emotion
     2. Check for crisis
-    3. Generate bot response
-    4. Save both messages
-    5. Return full response payload
+    3. Resolve assessment profile context
+    4. Generate personalized bot response
+    5. Save both messages
+    6. Return full response payload
     """
-    db = get_db()
-
     # 1. Detect emotion
     emotion_result = detect_emotion(user_text)
     emotion        = emotion_result["emotion"]
     score          = emotion_result["score"]
     crisis         = is_crisis(user_text)
 
-    # 2. Generate bot reply
+    # 2. Save user message
+    user_msg = Message(
+        session_id    = session_id,
+        sender        = "user",
+        content       = user_text,
+        emotion       = emotion,
+        emotion_score = score,
+        is_crisis     = int(crisis)
+    )
+    db.session.add(user_msg)
+    db.session.flush()
+
+    # 3. Resolve assessment context if not passed directly
+    if not assessment:
+        try:
+            from models import Assessment
+            latest_asm = Assessment.query.order_by(Assessment.taken_at.desc()).first()
+            if latest_asm:
+                assessment = latest_asm.to_dict()
+        except Exception:
+            assessment = None
+
+    # 4. Generate bot reply
     if crisis:
         bot_text = get_crisis_response(language)
     else:
-        bot_text = format_bot_message(emotion)
-
-    # 3. Save user message
-    user_msg = {
-        "_id":           str(uuid.uuid4()),
-        "session_id":    session_id,
-        "sender":        "user",
-        "content":       user_text,
-        "emotion":       emotion,
-        "emotion_score": score,
-        "is_crisis":     crisis,
-        "created_at":    datetime.utcnow().isoformat()
-    }
-    db.messages.insert_one(user_msg)
+        ai_reply = generate_openrouter_response(session_id, user_text, emotion, language, tone, assessment)
+        bot_text = ai_reply if ai_reply else format_bot_message(emotion, user_text, session_id, tone, assessment)
 
     # 4. Save bot message
-    bot_msg = {
-        "_id":        str(uuid.uuid4()),
-        "session_id": session_id,
-        "sender":     "bot",
-        "content":    bot_text,
-        "is_crisis":  crisis,
-        "created_at": datetime.utcnow().isoformat()
-    }
-    db.messages.insert_one(bot_msg)
+    bot_msg = Message(
+        session_id = session_id,
+        sender     = "bot",
+        content    = bot_text,
+        is_crisis  = int(crisis)
+    )
+    db.session.add(bot_msg)
+    db.session.commit()
 
     return {
-        "user_message": {**user_msg, "_id": user_msg["_id"]},
-        "bot_message":  {**bot_msg,  "_id": bot_msg["_id"]},
+        "user_message": user_msg.to_dict(),
+        "bot_message":  bot_msg.to_dict(),
         "emotion":      emotion,
         "score":        score,
         "is_crisis":    crisis
@@ -65,44 +73,36 @@ def handle_message(session_id: str, user_text: str, language: str = "en") -> dic
 
 def get_chat_history(session_id: str, limit: int = 50) -> list:
     """Fetch last N messages for a session."""
-    db       = get_db()
-    messages = list(
-        db.messages
-        .find({"session_id": session_id})
-        .sort("created_at", 1)
+    messages = (
+        Message.query
+        .filter_by(session_id=session_id)
+        .order_by(Message.created_at.asc())
         .limit(limit)
+        .all()
     )
-    for msg in messages:
-        msg["_id"] = str(msg["_id"])
-    return messages
+    return [m.to_dict() for m in messages]
 
 
 def log_mood_summary(session_id: str):
     """Summarise the session's emotions and save to mood_logs."""
-    db       = get_db()
-    messages = list(db.messages.find({
-        "session_id": session_id,
-        "sender":     "user"
-    }))
-
+    messages = Message.query.filter_by(session_id=session_id, sender="user").all()
     if not messages:
         return
 
     counts = {}
     for msg in messages:
-        emotion = msg.get("emotion")
-        if emotion:
-            counts[emotion] = counts.get(emotion, 0) + 1
+        if msg.emotion:
+            counts[msg.emotion] = counts.get(msg.emotion, 0) + 1
 
     if not counts:
         return
 
     dominant = max(counts, key=counts.get)
-    db.mood_logs.insert_one({
-        "_id":             str(uuid.uuid4()),
-        "session_id":      session_id,
-        "dominant_emotion": dominant,
-        "emotion_counts":  counts,
-        "message_count":   len(messages),
-        "logged_at":       datetime.utcnow().isoformat()
-    })
+    log = MoodLog(
+        session_id       = session_id,
+        dominant_emotion = dominant,
+        emotion_counts   = json.dumps(counts),
+        message_count    = len(messages)
+    )
+    db.session.add(log)
+    db.session.commit()

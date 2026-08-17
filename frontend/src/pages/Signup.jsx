@@ -1,27 +1,78 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useData } from '../context/DataContext';
+import { apiSignup } from '../services/api';
 
 function Signup() {
   const navigate = useNavigate();
-  const { updateProfile } = useData();
+  const { isLoggedIn, hasCompletedAssessment, updateProfile, signIn, initNewUserSession } = useData();
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      if (!hasCompletedAssessment) {
+        navigate('/assessment', { replace: true });
+      } else {
+        navigate('/dashboard', { replace: true });
+      }
+    }
+  }, [isLoggedIn, hasCompletedAssessment, navigate]);
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState(null);
 
-  const handleSubmit = (e) => {
+  // Password criteria checks
+  const criteria = {
+    length: password.length >= 8,
+    letters: /[a-zA-Z]/.test(password),
+    numbers: /[0-9]/.test(password),
+    symbols: /[^a-zA-Z0-9]/.test(password),
+  };
+
+  const score = Object.values(criteria).filter(Boolean).length;
+
+  const getStrengthInfo = () => {
+    if (!password) return { label: 'Empty', color: 'bg-outline-variant', text: 'text-outline' };
+    if (score <= 1) return { label: 'Weak', color: 'bg-rose-500', text: 'text-rose-500' };
+    if (score === 2) return { label: 'Fair', color: 'bg-amber-500', text: 'text-amber-500' };
+    if (score === 3) return { label: 'Good', color: 'bg-sky-500', text: 'text-sky-500' };
+    return { label: 'Strong', color: 'bg-emerald-500', text: 'text-emerald-500' };
+  };
+
+  const strength = getStrengthInfo();
+  const isStrong = score === 4;
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!agreeTerms) return;
 
-    updateProfile({
-      name: name || 'New User',
-      email: email || 'user@mindease.care'
-    });
+    if (!isStrong) {
+      setErrorMsg('Please choose a strong password that meets all 4 requirements below.');
+      return;
+    }
 
-    navigate('/dashboard');
+    setLoading(true);
+    setErrorMsg(null);
+
+    try {
+      const res = await apiSignup({
+        name: name || 'New User',
+        email,
+        password
+      });
+
+      initNewUserSession(res.user);
+      navigate('/assessment');
+    } catch (err) {
+      console.error('Signup error:', err);
+      setErrorMsg(err.message || 'Signup failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -54,7 +105,7 @@ function Signup() {
       </div>
 
       {/* Right Form Panel */}
-      <div className="flex-1 flex flex-col justify-center items-center min-h-screen bg-surface-container-lowest px-6 py-16 sm:px-10 md:px-16 relative overflow-hidden">
+      <div className="flex-1 flex flex-col justify-center items-center min-h-screen bg-surface-container-lowest px-6 py-12 sm:px-10 md:px-16 relative overflow-hidden">
         <div className="absolute top-6 left-6 right-6 flex justify-between items-center">
           <Link to="/" className="lg:hidden font-bold text-xl text-primary tracking-tight">MindEase</Link>
           <Link to="/" className="hidden lg:flex items-center gap-1.5 text-sm text-on-surface-variant hover:text-primary transition-colors group">
@@ -68,9 +119,16 @@ function Signup() {
 
         <div className="w-full max-w-[420px] space-y-6 animate-slide-up">
           <div className="space-y-2">
-            <h1 className="text-3xl font-bold text-on-surface tracking-tight">Create your account ✨</h1>
+            <h1 className="text-3xl font-bold text-on-surface tracking-tight">Create your account</h1>
             <p className="text-on-surface-variant text-sm">Free access to core mental wellness tools.</p>
           </div>
+
+          {errorMsg && (
+            <div className="p-3.5 bg-rose-500/10 text-rose-600 rounded-xl text-xs font-semibold border border-rose-500/20 flex items-center gap-2">
+              <span className="material-symbols-outlined text-base shrink-0">error</span>
+              <span>{errorMsg}</span>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
@@ -81,7 +139,7 @@ function Signup() {
                 required
                 id="name"
                 type="text"
-                placeholder="Alex Morgan"
+                placeholder="Jane Doe"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="w-full bg-surface border border-outline-variant/60 rounded-xl px-4 py-3.5 text-sm text-on-surface focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all"
@@ -96,14 +154,14 @@ function Signup() {
                 required
                 id="email"
                 type="email"
-                placeholder="alex.morgan@example.com"
+                placeholder="your.email@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full bg-surface border border-outline-variant/60 rounded-xl px-4 py-3.5 text-sm text-on-surface focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all"
               />
             </div>
 
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <label htmlFor="password" className="block text-sm font-semibold text-on-surface">
                 Password
               </label>
@@ -112,7 +170,7 @@ function Signup() {
                   required
                   id="password"
                   type={showPassword ? 'text' : 'password'}
-                  placeholder="Min. 8 characters"
+                  placeholder="e.g. Strong@2026!"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full bg-surface border border-outline-variant/60 rounded-xl px-4 py-3.5 text-sm text-on-surface focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all"
@@ -127,6 +185,58 @@ function Signup() {
                   </span>
                 </button>
               </div>
+
+              {/* Password Strength Progress Bar */}
+              {password.length > 0 && (
+                <div className="space-y-2 pt-1 animate-fade-in">
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-on-surface-variant font-medium">Password Strength:</span>
+                    <span className={`font-bold ${strength.text}`}>{strength.label}</span>
+                  </div>
+
+                  {/* 4-segment Progress Indicator */}
+                  <div className="grid grid-cols-4 gap-1.5 h-1.5 w-full">
+                    {[1, 2, 3, 4].map((step) => (
+                      <div
+                        key={step}
+                        className={`h-full rounded-full transition-all duration-300 ${step <= score ? strength.color : 'bg-outline-variant/30'
+                          }`}
+                      />
+                    ))}
+                  </div>
+
+                  {/* Criteria Checklist */}
+                  <div className="grid grid-cols-2 gap-1.5 pt-1 text-[11px]">
+                    <div className={`flex items-center gap-1 ${criteria.length ? 'text-emerald-600 font-semibold' : 'text-on-surface-variant/70'}`}>
+                      <span className="material-symbols-outlined text-xs">
+                        {criteria.length ? 'check_circle' : 'cancel'}
+                      </span>
+                      <span>Min. 8 characters</span>
+                    </div>
+
+                    <div className={`flex items-center gap-1 ${criteria.letters ? 'text-emerald-600 font-semibold' : 'text-on-surface-variant/70'}`}>
+                      <span className="material-symbols-outlined text-xs">
+                        {criteria.letters ? 'check_circle' : 'cancel'}
+                      </span>
+                      <span>Letters (a-z, A-Z)</span>
+                    </div>
+
+                    <div className={`flex items-center gap-1 ${criteria.numbers ? 'text-emerald-600 font-semibold' : 'text-on-surface-variant/70'}`}>
+                      <span className="material-symbols-outlined text-xs">
+                        {criteria.numbers ? 'check_circle' : 'cancel'}
+                      </span>
+                      <span>Numbers (0-9)</span>
+                    </div>
+
+                    <div className={`flex items-center gap-1 ${criteria.symbols ? 'text-emerald-600 font-semibold' : 'text-on-surface-variant/70'}`}>
+                      <span className="material-symbols-outlined text-xs">
+                        {criteria.symbols ? 'check_circle' : 'cancel'}
+                      </span>
+                      <span>Symbols (@, #, !, $)</span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="flex items-start gap-2.5 pt-1">
@@ -138,16 +248,36 @@ function Signup() {
                 onChange={(e) => setAgreeTerms(e.target.checked)}
                 className="w-4 h-4 rounded border-outline-variant accent-primary cursor-pointer mt-0.5"
               />
-              <label htmlFor="terms" className="text-xs text-on-surface-variant cursor-pointer leading-relaxed">
-                I agree to the Terms of Service &amp; Privacy Policy
+              <label htmlFor="terms" className="text-xs text-on-surface-variant leading-relaxed">
+                I agree to the{' '}
+                <Link
+                  to="/terms"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary font-bold hover:underline"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  Terms of Service
+                </Link>{' '}
+                &amp;{' '}
+                <Link
+                  to="/privacy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary font-bold hover:underline"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  Privacy Policy
+                </Link>
               </label>
             </div>
 
             <button
               type="submit"
-              className="w-full bg-primary text-white py-3.5 rounded-xl text-sm font-semibold hover:bg-primary/90 active:scale-98 transition-all shadow-lg shadow-primary/20 mt-2 flex items-center justify-center gap-2"
+              disabled={loading || !agreeTerms || (password.length > 0 && !isStrong)}
+              className="w-full bg-primary text-white py-3.5 rounded-xl text-sm font-semibold hover:bg-primary/90 active:scale-98 transition-all shadow-lg shadow-primary/20 mt-2 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <span>Create Free Account</span>
+              <span>{loading ? 'Creating Account...' : 'Create Free Account'}</span>
               <span className="material-symbols-outlined text-base">arrow_forward</span>
             </button>
           </form>

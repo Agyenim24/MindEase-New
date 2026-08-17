@@ -4,7 +4,7 @@ import Footer from '../components/Footer';
 import { useData } from '../context/DataContext';
 
 function LearnMore() {
-  const { testimonials, faqs, landingStats } = useData();
+  const { testimonials, faqs, landingStats, isLoggedIn } = useData();
   const [openFaq, setOpenFaq] = useState(0);
 
   const features = [
@@ -37,12 +37,20 @@ function LearnMore() {
         </div>
 
         <div className="flex items-center gap-3">
-          <Link to="/login" className="hidden sm:block text-on-surface-variant hover:text-primary font-body-md">
-            Login
-          </Link>
-          <Link to="/signup" className="bg-primary text-white px-6 py-2.5 rounded-full font-body-md hover:opacity-90 transition shadow">
-            Get Started
-          </Link>
+          {isLoggedIn ? (
+            <Link to="/dashboard" className="bg-primary text-white px-6 py-2.5 rounded-full font-body-md hover:opacity-90 transition shadow">
+              Go to Dashboard
+            </Link>
+          ) : (
+            <>
+              <Link to="/login" className="hidden sm:block text-on-surface-variant hover:text-primary font-body-md">
+                Login
+              </Link>
+              <Link to="/signup" className="bg-primary text-white px-6 py-2.5 rounded-full font-body-md hover:opacity-90 transition shadow">
+                Get Started
+              </Link>
+            </>
+          )}
         </div>
       </nav>
 
@@ -61,10 +69,10 @@ function LearnMore() {
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-3 pt-2">
               <Link
-                to="/signup"
+                to={isLoggedIn ? "/dashboard" : "/signup"}
                 className="bg-primary text-white px-8 py-4 rounded-full font-bold text-sm hover:opacity-90 transition shadow-lg flex items-center justify-center gap-2"
               >
-                <span>Begin Your Journey</span>
+                <span>{isLoggedIn ? "Go to Dashboard" : "Begin Your Journey"}</span>
                 <span className="material-symbols-outlined text-base">arrow_forward</span>
               </Link>
             </div>
