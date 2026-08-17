@@ -86,8 +86,10 @@ def format_bot_message(emotion: str, user_text: str = "", session_id: str = "", 
     if "worked all day" in t or "working all day" in t:
         return "Working all day can definitely leave you feeling drained. Make sure to take some time to unwind tonight. How are you holding up after such a long day?"
 
-    if "failed my exam" in t or "failed exam" in t:
-        return "I'm really sorry to hear that. Failing an exam is tough and disappointing, but it doesn't define your intelligence or future. How are you feeling right now?"
+    if any(k in t for k in ["exam", "exm", "test", "quiz", "midterm", "final exam", "studying", "study"]):
+        if "failed" in t:
+            return "I'm really sorry to hear that. Failing an exam is tough, but it doesn't define your intelligence or future. How are you holding up right now?"
+        return "Exam pressure can really pile up! 📚 Are you feeling stressed about the amount of material to study, or is it fear of the exam itself? I can share study tips or a quick 2-minute breathing exercise to help you focus."
 
     if "scared about what happens next" in t or "scared about what happens" in t or "scared about the future" in t:
         return "It's completely natural to feel scared when facing uncertainty about what comes next. Let's take it one step at a time — what's the main concern on your mind right now?"

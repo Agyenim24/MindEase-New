@@ -1658,7 +1658,7 @@ export function DataProvider({ children }) {
     }
 
     // 4. Academic Pressure & Study Burnout
-    if (/study|exam|assignment|class|school|fail|grade|homework|college|university|academic|test/i.test(t)) {
+    if (/study|exam|exm|exams|assignment|class|school|fail|grade|homework|college|university|academic|test/i.test(t)) {
       const response = "Studying when you feel exhausted or worried about grades can make even simple tasks feel overwhelming. It makes total sense that you're feeling this weight.\n\nInstead of trying to force your way through a huge pile of work, here are two simple choices you can pick from right now:\n\n1. **5-Minute Brain Dump**: Write down just 3 specific things you need to do, pick the smallest one, and set a timer for 15 minutes.\n2. **Complete Micro-Pause**: Step away from your desk for 10 minutes, drink a glass of water, and let your brain rest completely without looking at study materials.\n\nWhich of those two options sounds more manageable for you right now?";
       if (lastBotMsg !== response) return response;
     }
@@ -1748,12 +1748,11 @@ export function DataProvider({ children }) {
     // Proven free-tier models in priority order. 'openrouter/free' is NOT a valid
     // model slug and causes silent 400 errors – removed from this list.
     const modelsToTry = [
-      "meta-llama/llama-3.1-8b-instruct:free",
-      "mistralai/mistral-7b-instruct:free",
-      "google/gemma-2-9b-it:free",
+      "google/gemma-4-26b-a4b-it:free",
+      "google/gemma-4-31b-it:free",
       "liquid/lfm-2.5-2.6b:free",
       "nvidia/nemotron-3.5-lightning:free",
-      "google/gemma-4-26b-a4b-it:free",
+      "z-ai/glm-5.2:free",
     ];
 
     const systemPrompt = `You are MindEase, a warm, natural, and empathetic conversational companion for mental wellness. You converse like an attentive, caring human friend.

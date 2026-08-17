@@ -145,12 +145,11 @@ def generate_openrouter_response(session_id: str, user_text: str, emotion: str =
     # Ordered list of proven free-tier models. 'openrouter/free' is NOT a valid
     # model slug – it was causing every first attempt to silently fail.
     default_free_models = [
-        "meta-llama/llama-3.1-8b-instruct:free",
-        "mistralai/mistral-7b-instruct:free",
-        "google/gemma-2-9b-it:free",
+        "google/gemma-4-26b-a4b-it:free",
+        "google/gemma-4-31b-it:free",
         "liquid/lfm-2.5-2.6b:free",
         "nvidia/nemotron-3.5-lightning:free",
-        "google/gemma-4-26b-a4b-it:free",
+        "z-ai/glm-5.2:free",
     ]
     # Put the configured model first if it is set and isn't the invalid placeholder
     if cfg_model and cfg_model not in ("", "openrouter/free"):
